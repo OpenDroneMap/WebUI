@@ -102,3 +102,9 @@ package-lock.json
 .DS_Store
 
 .secret_key
+
+# Documentation folders (local reference only)
+for-claude/
+for-humans/
+CLAUDE.md
+
