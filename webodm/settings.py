@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # GIS library paths for Alpine Linux
 # Django GIS needs to know where to find GDAL and GEOS shared libraries
-GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH', '/usr/lib/libgdal.so.36')
+GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH', '/usr/lib/libgdal.so.39')
 GEOS_LIBRARY_PATH = os.environ.get('GEOS_LIBRARY_PATH', '/usr/lib/libgeos_c.so.1')
 
 # For best practices
@@ -190,7 +190,7 @@ AUTHENTICATION_BACKENDS = (
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = str(tzlocal.get_localzone())  # tzlocal 5.x returns ZoneInfo, use str() to get timezone name
+# TIME_ZONE = str(tzlocal.get_localzone())  # tzlocal 5.x returns ZoneInfo, use str() to get timezone name
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True

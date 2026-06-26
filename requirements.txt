@@ -13,7 +13,8 @@
 
 # Core Django Framework
 Django==5.2.7
-djangorestframework==3.15.2
+# Django==6.0.6
+djangorestframework==3.17.1
 django-cors-headers==4.5.0
 django-filter==24.3
 django-guardian==2.4.0
@@ -180,3 +181,7 @@ strict-rfc3339==0.7
 # boto3 for S3/cloud storage
 boto3>=1.35.0
 # >>>>>>> image-upgrade-project/webapp-worker-alpine
+
+# (2026/06/26 8:07am) copied from above
+pyodx==1.5.14
+dnspython==2.7.0

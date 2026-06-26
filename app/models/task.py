@@ -289,7 +289,7 @@ class Task(models.Model):
     size = models.FloatField(default=0.0, blank=True, help_text=_("Size of the task on disk in megabytes"), verbose_name=_("Size"))
     compacted = models.BooleanField(default=False, help_text=_("A flag indicating whether this task was compacted"), verbose_name=_("Compact"))
     crop = GeometryField(null=True, blank=True, srid=4326, help_text=_("Polygon defining the crop area of this task"), verbose_name=_("Crop Polygon"))
-    media = fields.JSONField(default=list, blank=True, help_text=_("List of media files associated with this task"), verbose_name=_("Media"))
+    media = models.JSONField(default=list, blank=True, help_text=_("List of media files associated with this task"), verbose_name=_("Media"))
 
     
     class Meta:

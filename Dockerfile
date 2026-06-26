@@ -24,11 +24,15 @@ RUN echo "UTC" > /etc/timezone
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     <<EOT
     # Enable community and testing repos for PDAL
-    echo "https://dl-cdn.alpinelinux.org/alpine/v3.22/main" > /etc/apk/repositories
-    echo "https://dl-cdn.alpinelinux.org/alpine/v3.22/community" >> /etc/apk/repositories
+    echo "https://dl-cdn.alpinelinux.org/alpine/v3.24/main" > /etc/apk/repositories
+    echo "https://dl-cdn.alpinelinux.org/alpine/v3.24/community" >> /etc/apk/repositories
 
     # Update package index
     apk update
+
+    # Upgrade packages
+    apk upgrade
+    apk upgrade -alv
 
     # Build dependencies
     apk add --no-cache \
@@ -39,7 +43,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
         curl \
         ca-certificates \
         bash \
-        coreutils
+        coreutils 
 
     # Install libexecinfo from Alpine 3.16 (removed in 3.17+)
     apk add --no-cache --update --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main/ \
@@ -198,10 +202,15 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     echo "UTC" > /etc/timezone
 
     # Enable community repo
-    echo "https://dl-cdn.alpinelinux.org/alpine/v3.22/main" > /etc/apk/repositories
-    echo "https://dl-cdn.alpinelinux.org/alpine/v3.22/community" >> /etc/apk/repositories
+    echo "https://dl-cdn.alpinelinux.org/alpine/v3.24/main" > /etc/apk/repositories
+    echo "https://dl-cdn.alpinelinux.org/alpine/v3.24/community" >> /etc/apk/repositories
 
+    # Update package index
     apk update
+
+    # Upgrade packages
+    apk upgrade
+    apk upgrade -alv
 
     # Runtime dependencies only
     apk add --no-cache \
