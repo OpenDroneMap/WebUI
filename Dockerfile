@@ -251,6 +251,8 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
 
     # Cleanup
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
+
+    mkdir -p /webodm/app/media/tmp
 EOT
 
 # Copy virtualenv from builder
