@@ -11,8 +11,8 @@ from django.utils.translation import gettext_lazy as _
 from webodm import settings
 
 import json
-from pyodx import Node
-from pyodx import exceptions
+from pyodm import Node
+from pyodm import exceptions
 from django.db.models import signals
 from datetime import timedelta
 import logging

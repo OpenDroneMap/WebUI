@@ -47,7 +47,7 @@ from app.imageutils import extract_gps_from_image, is_panorama
 from app.video import extract_subtitles, srt_file_for_video, extract_gps_from_srt, VIDEO_EXTENSIONS as VIDEO_MOD_EXTENSIONS
 from nodeodm import status_codes
 from nodeodm.models import ProcessingNode
-from pyodx.exceptions import NodeResponseError, NodeConnectionError, NodeServerError, GenericError
+from pyodm.exceptions import NodeResponseError, NodeConnectionError, NodeServerError, OdmError
 from webodm import settings
 from app.classes.gcp import GCPFile
 from .project import Project
@@ -779,7 +779,7 @@ class Task(models.Model):
                         # We don't care if this fails (we tried)
                         try:
                             self.processing_node.cancel_task(self.uuid)
-                        except GenericError:
+                        except OdmError:
                             logger.warning("Could not cancel {} on processing node. We'll proceed anyway...".format(self))
 
                         self.status = status_codes.CANCELED
@@ -803,7 +803,7 @@ class Task(models.Model):
                             try:
                                 info = self.processing_node.get_task_info(self.uuid)
                                 uuid_still_exists = info.uuid == self.uuid
-                            except GenericError:
+                            except OdmError:
                                 pass
 
                         need_to_reprocess = False
@@ -850,7 +850,7 @@ class Task(models.Model):
                         # Are expected to be purged on their own after a set amount of time anyway
                         try:
                             self.processing_node.remove_task(self.uuid)
-                        except GenericError:
+                        except OdmError:
                             pass
 
                     # What's more important is that we delete our task properly here
