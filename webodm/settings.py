@@ -102,6 +102,10 @@ PLUGINS_BLACKLIST = [
 # Serve media static files URLs even in production
 FORCE_MEDIA_STATICFILES = False
 
+
+# See osm.wiki/blocked for more information
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
 # Application definition
 
 INSTALLED_APPS = [
