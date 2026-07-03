@@ -59,11 +59,13 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ]; then
     webpack --watch &
 fi
 
+
+ 
 echo Running migrations
 python manage.py migrate
 
 if [[ "$WO_DEFAULT_NODES" > 0 ]]; then
-    python manage.py addnode node-odx-1 3000 --label node-odx-1
+    python manage.py addnode node-odm-1 3000 --label node-odm-1
 fi
 
 if [[ "$WO_CREATE_MICMAC_PNODE" = "YES" ]]; then

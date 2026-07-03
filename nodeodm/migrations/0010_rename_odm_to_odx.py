@@ -7,8 +7,8 @@ from django.db.models import Q
 
 def rename_default_node(apps, schema_editor):
     for default_node in ProcessingNode.objects.filter(Q(hostname='node-odm-1') | Q(label='node-odm-1')):
-        default_node.hostname = 'node-odx-1'
-        default_node.label = 'node-odx-1'
+        default_node.hostname = 'node-odm-1'
+        default_node.label = 'node-odm-1'
         default_node.save()
     
 class Migration(migrations.Migration):
