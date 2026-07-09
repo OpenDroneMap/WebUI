@@ -60,6 +60,7 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ]; then
 fi
 
 
+mkdir -p /webodm/app/media/tmp
  
 echo Running migrations
 python manage.py migrate

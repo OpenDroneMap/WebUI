@@ -40,6 +40,7 @@ DEFAULT_SSL_INSECURE_PORT_REDIRECT="$WO_SSL_INSECURE_PORT_REDIRECT"
 DEFAULT_BROKER="$WO_BROKER"
 DEFAULT_NODES="$WO_DEFAULT_NODES"
 
+
 # Parse args for overrides
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -88,7 +89,7 @@ case $key in
     --ssl-cert)
     WO_SSL_CERT=$(realpath "$2")
     export WO_SSL_CERT
-    shift # past argument
+  shift # past argument
     shift # past value
     ;;
     --ssl-insecure-port-redirect)
@@ -167,6 +168,7 @@ case $key in
 esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameter
+
 
 if [[ "${WO_DEFAULT_NODES}" -gt 1 ]]; then
 	echo "ATTENTION: --default-nodes values greater than 1 are no longer supported."
@@ -427,6 +429,12 @@ start(){
 	echo "================================"
 	echo "Make sure to issue a $0 down if you decide to change the environment."
 	echo ""
+
+
+	# echo "Media directory is..."
+	# echo $WO_MEDIA_DIR
+	# mkdir -p $WO_MEDIA_DIR
+	# mkdir -p webodm/app/media/tmp
 
 	command="$docker_compose -f docker-compose.yml"
 
