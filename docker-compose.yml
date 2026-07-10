@@ -14,8 +14,16 @@ services:
       - ${WO_DB_DIR}:/var/lib/postgresql:z
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     environment:
+      # - POSTGRES_DB=webodm_dev
+      # - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+        interval: 15s
+        retries: 10
+        start_period: 30s
+        timeout: 10s
     command: >
       postgres
       -c autovacuum_max_workers=6
@@ -28,12 +36,12 @@ services:
       -c autovacuum_vacuum_cost_limit=1000
     restart: unless-stopped
     oom_score_adj: -100
-    # environment:
-    #   - POSTGRES_DB=webodm_dev
-    #   - POSTGRES_USER=postgres
-    #   - POSTGRES_PASSWORD=postgres
   webapp:
-    image: webodm/webodm_webapp
+    # image: webodm/webodm_webapp
+    # build:
+    #   context: ./
+    #   dockerfile: ./Dockerfile
+    build: .
     container_name: webapp
     entrypoint: /bin/bash -c "crond && chmod +x /webodm/*.sh && /bin/bash -c \"/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 broker:6379 -- /webodm/start.sh\""
     volumes:
@@ -41,9 +49,15 @@ services:
     ports:
       - "${WO_PORT}:8000"
     depends_on:
-      - db
-      - broker
-      - worker
+      db:
+        condition: service_healthy
+        restart: true
+      broker:
+        condition: service_started
+        restart: true
+      worker:
+        condition: service_started
+        restart: true
     environment:
       - PGPASSWORD=postgres
       - WO_PORT
@@ -61,15 +75,27 @@ services:
     container_name: broker
     restart: unless-stopped
     oom_score_adj: -500
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
   worker:
-    image: webodm/webodm_webapp
+    # image: webodm/webodm_webapp
+    # build:
+    #   context: ./
+    #   dockerfile: ./Dockerfile
+    build: .
     container_name: worker
     entrypoint: /bin/bash -c "/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 broker:6379 -- /webodm/wait-for-it.sh -t 0 webapp:8000 -- /webodm/worker.sh start"
     volumes:
       - ${WO_MEDIA_DIR}:/webodm/app/media:z
     depends_on:
-      - db
-      - broker
+      db:
+        condition: service_healthy
+        restart: true
+      broker:
+        condition: service_started
+        restart: true
     environment:
       - PGPASSWORD=postgres
       - WO_BROKER
