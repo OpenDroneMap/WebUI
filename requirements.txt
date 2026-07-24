@@ -2,8 +2,8 @@
 # Python 3.12, Django 5.2 LTS, Celery 5.5
 
 # Core Django Framework
-Django==5.2.7
-# Django==6.0.6
+# Django==5.2.7
+Django==6.0.7
 djangorestframework==3.17.1
 django-cors-headers==4.5.0
 django-filter==24.3
