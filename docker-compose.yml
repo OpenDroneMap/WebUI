@@ -37,6 +37,10 @@ services:
     restart: unless-stopped
     oom_score_adj: -100
   webapp:
+    # image: webodm/webodm_webapp
+    # build:
+    #   context: ./
+    #   dockerfile: ./Dockerfile
     build: .
     container_name: webapp
     entrypoint: /bin/bash -c "crond && chmod +x /webodm/*.sh && /bin/bash -c \"/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 broker:6379 -- /webodm/start.sh\""
@@ -47,10 +51,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+        restart: true
       broker:
         condition: service_started
+        restart: true
       worker:
         condition: service_started
+        restart: true
     environment:
       - PGPASSWORD=postgres
       - WO_PORT
@@ -71,7 +78,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+        restart: true
   worker:
+    # image: webodm/webodm_webapp
+    # build:
+    #   context: ./
+    #   dockerfile: ./Dockerfile
     build: .
     container_name: worker
     entrypoint: /bin/bash -c "/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 broker:6379 -- /webodm/wait-for-it.sh -t 0 webapp:8000 -- /webodm/worker.sh start"
@@ -80,8 +92,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+        restart: true
       broker:
         condition: service_started
+        restart: true
     environment:
       - PGPASSWORD=postgres
       - WO_BROKER
