@@ -28,12 +28,8 @@ services:
       -c autovacuum_vacuum_cost_limit=1000
     restart: unless-stopped
     oom_score_adj: -100
-    # environment:
-    #   - POSTGRES_DB=webodm_dev
-    #   - POSTGRES_USER=postgres
-    #   - POSTGRES_PASSWORD=postgres
   webapp:
-    image: webodm/webodm_webapp
+    build: .
     container_name: webapp
     entrypoint: /bin/bash -c "crond && chmod +x /webodm/*.sh && /bin/bash -c \"/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 broker:6379 -- /webodm/start.sh\""
     volumes:
@@ -62,7 +58,7 @@ services:
     restart: unless-stopped
     oom_score_adj: -500
   worker:
-    image: webodm/webodm_webapp
+    build: .
     container_name: worker
     entrypoint: /bin/bash -c "/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 broker:6379 -- /webodm/wait-for-it.sh -t 0 webapp:8000 -- /webodm/worker.sh start"
     volumes:
