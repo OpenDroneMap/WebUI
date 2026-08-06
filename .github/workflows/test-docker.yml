@@ -37,6 +37,8 @@ jobs:
         swap-size-gb: 12
     - name: Build and Test
       run: |
+        docker system prune -af
+        docker volume prune -af
         docker compose -f docker-compose.yml -f docker-compose.build.yml build --build-arg TEST_BUILD=ON
         docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
         sleep 20
