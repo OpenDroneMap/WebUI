@@ -5,5 +5,7 @@ services:
   # db: Commented out - use official postgis/postgis:14-3.3-alpine image from docker-compose.yml
   # db:
   #   build: ./db
+  worker:
+    build: .
   webapp:
     build: .
