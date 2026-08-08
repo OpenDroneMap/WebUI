@@ -61,6 +61,7 @@ fi
 
 
 mkdir -p /webodm/app/media/tmp
+mkdir -p /webodm/app/media_test/tmp
  
 echo Running migrations
 python manage.py migrate

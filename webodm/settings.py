@@ -158,6 +158,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('WO_DATABASE_PASSWORD', 'postgres'),
         'HOST': os.environ.get('WO_DATABASE_HOST', 'db'),
         'PORT': os.environ.get('WO_DATABASE_PORT', '5432'),
+        'TEST': {
+            'TEMPLATE': 'template1',
+        }
     }
 }
 

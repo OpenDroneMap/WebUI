@@ -1,14 +1,19 @@
 ALTER USER postgres PASSWORD 'postgres';
 
-CREATE DATABASE webodm_dev;
-
--- Connect to webodm_dev to enable extensions
-\c webodm_dev
+-- Enable PostGIS extensions on template1 so all new databases inherit them
+\c template1
 
 -- Enable PostGIS extensions (required for PostgreSQL 14+)
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS postgis_raster;
 CREATE EXTENSION IF NOT EXISTS postgis_topology;
+
+-- Create the production database
+CREATE DATABASE webodm_dev;
+
+-- Connect to webodm_dev to enable extensions
+\c webodm_dev
+
 
 -- Configure PostGIS settings
 ALTER DATABASE webodm_dev SET postgis.gdal_enabled_drivers TO 'GTiff';
