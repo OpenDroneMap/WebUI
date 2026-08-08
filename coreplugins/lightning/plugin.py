@@ -14,7 +14,10 @@ from django.views.decorators.http import require_POST
 
 from nodeodm.models import ProcessingNode
 from app.api.processingnodes import ProcessingNodeSerializer
+from .api import GetTaskSize, ShareTask
+from webodm import settings
 
+API_BASE = "http://192.168.2.253:5000" if (settings.DEV or settings.TESTING) else "https://webodm.net"
 ds = GlobalDataStore('lightning')
 
 def JsonResponse(dict):
@@ -25,20 +28,41 @@ class Plugin(PluginBase):
         return [Menu(_("Lightning"), self.public_url(""), "fa fa-bolt fa-fw")]
 
     def include_js_files(self):
-        return ['add_cost_estimate.js']
+        return ['main.js']
 
     def build_jsx_components(self):
-        return ['app.jsx', 'CostEstimateItem.jsx']
+        return ['app.jsx', 'CostEstimateItem.jsx', 'ShareButton.jsx']
 
     def app_mount_points(self):
         @login_required
         def main(request):
-            uds = UserDataStore('lightning', request.user)
+            uds = self.get_user_data_store(request.user)
 
             return render(request, self.template_path("index.html"), {
-                'title': _('Lightning'),
-                'api_key': uds.get_string("api_key")
+                'title': 'Lightning',
+                'api_key': uds.get_string("api_key"),
+                'api_base': API_BASE
             })
+        
+        def main_js(request):
+            share_enabled = False
+            api_key = ""
+
+            if request.user.is_authenticated:
+                uds = self.get_user_data_store(request.user)
+                share_enabled = uds.get_bool("share_enabled")
+                api_key = uds.get_string("api_key")
+            
+            return render(
+                request,
+                self.template_path("main.js"),
+                {
+                    "share_enabled": share_enabled,
+                    "api_key": api_key,
+                    "api_base": API_BASE
+                },
+                content_type="text/javascript",
+            )
 
         @login_required
         @require_POST
@@ -98,15 +122,37 @@ class Plugin(PluginBase):
             lightning_node_ids = ds.get_json("nodes", [])
             return JsonResponse({'result': int(request.GET.get('id')) in lightning_node_ids})
 
+        @login_required
+        @require_POST
+        def set_share_buttons_pref(request):
+            uds = UserDataStore('lightning', request.user)
+            
+            enabled = request.POST.get('enabled') == 'true'
+            uds.set_bool("share_enabled", enabled)
+            return JsonResponse({'enabled': enabled})
+
+        @login_required
+        def get_share_buttons_prefs(request):
+            uds = UserDataStore('lightning', request.user)
+            return JsonResponse({'enabled': uds.get_bool("share_enabled")})
 
         return [
             MountPoint('$', main),
+            MountPoint('main.js$', main_js),
             MountPoint('save_api_key$', save_api_key),
             MountPoint('sync_processing_node$', sync_processing_node),
             MountPoint('get_processing_nodes$', get_processing_nodes),
             MountPoint('is_lightning_node$', is_lightning_node),
+            MountPoint('set_share_buttons_pref$', set_share_buttons_pref),
+            MountPoint('get_share_buttons_prefs$', get_share_buttons_prefs),
         ]
 
+    def api_mount_points(self):
+        return [
+            MountPoint('task/(?P<pk>[^/.]+)/size$', GetTaskSize.as_view()),
+            MountPoint('task/(?P<pk>[^/.]+)/share$', ShareTask.as_view()),
+            
+        ]
 
 @receiver(signals.processing_node_removed, dispatch_uid="lightning_on_processing_node_removed")
 def lightning_on_processing_node_removed(sender, processing_node_id, **kwargs):

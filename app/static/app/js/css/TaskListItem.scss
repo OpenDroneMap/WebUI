@@ -42,12 +42,16 @@
         border-width: 1px;
         border-radius: 2px;
         margin-right: 16px;
+        & > i.fa{
+            font-size: 14px;
+        }
     }
 
     .actions{
         display: flex;
         align-items: center;
         padding-right: 2px;
+        justify-content: flex-end;
     }
 
     @media screen and (max-width: 576px){
@@ -65,9 +69,9 @@
 
     .expanded-panel{
         padding-top: 4px;
-        padding-bottom: 16px;
-        padding-left: 16px;
-        padding-right: 16px;
+        padding-bottom: 4px;
+        padding-left: 0px;
+        padding-right: 0px;
 
         .info-table {
             tr td:first-child {
@@ -116,7 +120,7 @@
                 }
             }
 
-            .edit-button{
+            .last-button{
                 margin-right: 0px;
             }
 
@@ -165,6 +169,23 @@
         overflow: hidden;
         &:hover{
             opacity: 0.9;
+        }
+    }
+
+    .task-id-link{
+        text-decoration: none !important;
+        color: inherit;
+        i{
+            margin-left: 4px;
+            display: none;
+        }
+        i.visible{
+            display: inline-block;
+        }
+        &:hover{
+            i{
+                display: inline-block;
+            }
         }
     }
 }

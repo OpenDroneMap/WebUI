@@ -8,6 +8,7 @@ import MapPreview from './MapPreview';
 import update from 'immutability-helper';
 import PluginsAPI from '../classes/plugins/API';
 import statusCodes from '../classes/StatusCodes';
+import Gcp from '../classes/Gcp';
 import { _, interpolate } from '../classes/gettext';
 
 class NewTaskPanel extends React.Component {
@@ -15,7 +16,8 @@ class NewTaskPanel extends React.Component {
     filesCount: 0,
     showResize: false,
     showAlign: false,
-    projectId: null
+    projectId: null,
+    basemaps: []
   };
 
   static propTypes = {
@@ -26,7 +28,8 @@ class NewTaskPanel extends React.Component {
       showAlign: PropTypes.bool,
       getFiles: PropTypes.func,
       projectId: PropTypes.number,
-      suggestedTaskName: PropTypes.oneOfType([PropTypes.string, PropTypes.func])
+      suggestedTaskName: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+      basemaps: PropTypes.array
   };
 
   constructor(props){
@@ -34,7 +37,7 @@ class NewTaskPanel extends React.Component {
 
     this.state = {
       editTaskFormLoaded: false,
-      resizeMode: Storage.getItem('resize_mode') === null ? ResizeModes.YES : ResizeModes.fromString(Storage.getItem('resize_mode')),
+      resizeMode: Storage.getItem('resize_mode') === null ? ResizeModes.NO : ResizeModes.fromString(Storage.getItem('resize_mode')),
       resizeSize: parseInt(Storage.getItem('resize_size')) || 2048,
       alignTo: "auto",
       alignTasks: [], // loaded on mount if showAlign is true
@@ -45,6 +48,7 @@ class NewTaskPanel extends React.Component {
       loading: false,
       showMapPreview: false,
       dismissImageCountWarning: false,
+      showMalformedGcpErrors: false,
     };
 
     this.save = this.save.bind(this);
@@ -172,6 +176,32 @@ class NewTaskPanel extends React.Component {
     return this.mapPreview.getCropPolygon();
   };
 
+  getGcpFile = () => {
+    if (!this.props.getFiles) return null;
+
+    const files = this.props.getFiles();
+    for (let i = 0; i < files.length; i++){
+      const f = files[i];
+      if (f.type.indexOf("text") === 0 && ["geo.txt", "image_groups.txt"].indexOf(f.name.toLowerCase()) === -1){
+        if (!f._gcp){
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (e.target.result){
+              const gcp = new Gcp(e.target.result);
+              if (!gcp.valid()){
+                this.setState({showMalformedGcpErrors: true});
+              }
+              f._gcp = gcp;
+            }
+          };
+          reader.readAsText(f);
+        }
+        
+        return f;
+      }
+    }
+  }
+
   handlePolygonChange = () => {
     if (this.taskForm) this.taskForm.forceUpdate();
   }
@@ -201,17 +231,33 @@ class NewTaskPanel extends React.Component {
     let filesCountOk = true;
     if (this.taskForm && !this.taskForm.checkFilesCount(this.props.filesCount)) filesCountOk = false;
     
+    let fileCountInfo = interpolate(_("%(count)s files selected."), { count: this.props.filesCount });
+    let gcp = this.getGcpFile();
+    if (gcp){
+      fileCountInfo = interpolate(_("%(count)s files and GCP file (%(name)s) selected."), { count: this.props.filesCount - 1, name: gcp.name });
+    }
+
     return (
       <div className="new-task-panel theme-background-highlight">
         <div className="form-horizontal">
           <div className={this.state.inReview ? "disabled" : ""}>
-            <p>{interpolate(_("%(count)s files selected. Please check these additional options:"), { count: this.props.filesCount})}</p>
+            <p>{fileCountInfo} {_("Please check these additional options:")}</p>
             {this.props.filesCount === 999 && !this.state.dismissImageCountWarning ? 
             <div className="alert alert-warning alert-dismissible alert-images">
               <button type="button" className="close" title={_("Close")} onClick={() => this.setState({dismissImageCountWarning: true})}><span aria-hidden="true">&times;</span></button>
               <i className="fa fa-hand-point-right"></i> {_("Did you forget any images? When images exceed 1000, they are often stored inside multiple folders on the SD card.")}
             </div>
             : ""}
+
+            {gcp && gcp._gcp && this.state.showMalformedGcpErrors ? 
+            <div className="alert alert-warning alert-dismissible alert-images">
+              <button type="button" className="close" title={_("Close")} onClick={() => this.setState({showMalformedGcpErrors: false})}><span aria-hidden="true">&times;</span></button>
+              <div dangerouslySetInnerHTML={{__html: interpolate(_("Whoops! It looks like your GCP file is not formatted properly: %(errors)s See %(link)s for information on the GCP file format"), {
+                link: `<a href="${window.__gcpDocsLink}" target="_blank">${_("GCP File")}</a>`,
+                errors: "<ul>" + gcp._gcp.errors.map(err => `<li>${err}</li>`) + "</ul>"
+              })}}></div>
+            </div> : ""}
+            
 
             {!filesCountOk ? 
             <div className="alert alert-warning">
@@ -226,6 +272,7 @@ class NewTaskPanel extends React.Component {
               getFiles={this.props.getFiles}
               onPolygonChange={this.handlePolygonChange}
               onImagesBboxChanged={this.handleImagesBboxChange}
+              basemaps={this.props.basemaps}
               ref={(domNode) => {this.mapPreview = domNode; }}
             /> : ""}
 
@@ -236,6 +283,7 @@ class NewTaskPanel extends React.Component {
               inReview={this.state.inReview}
               suggestedTaskName={this.handleSuggestedTaskName}
               getCropPolygon={this.getCropPolygon}
+              getGcpFile={this.getGcpFile}
               ref={(domNode) => { if (domNode) this.taskForm = domNode; }}
             />
 

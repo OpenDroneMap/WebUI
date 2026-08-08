@@ -136,3 +136,9 @@ class TestWorker(BootTestCase):
         reply = json.loads(res.content.decode("utf-8"))
         self.assertEqual(reply["error"], "Task not ready")
 
+        # Can cancel bogus worker task
+        res = client.post("/api/workers/cancel/bogus")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        reply = json.loads(res.content.decode("utf-8"))
+        self.assertTrue(reply["success"])
+

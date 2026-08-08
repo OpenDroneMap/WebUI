@@ -11,9 +11,9 @@ from django.http import HttpResponse
 from rio_tiler.errors import TileOutsideBounds
 from rio_tiler.utils import has_alpha_band, \
     non_alpha_indexes, render, create_cutline
-from rio_tiler.utils import _stats as raster_stats
-from rio_tiler.models import ImageStatistics, ImageData
-from rio_tiler.models import Metadata as RioMetadata
+from rio_tiler.utils import get_array_statistics as raster_stats
+from rio_tiler.models import BandStatistics, ImageData
+from rio_tiler.models import Info as RioMetadata
 from rio_tiler.profiles import img_profiles
 from rio_tiler.colormap import cmap as colormap, apply_cmap
 from rio_tiler.io import COGReader
@@ -25,12 +25,14 @@ from .hsvblend import hsv_blend
 from .hillshade import LightSource
 from .formulas import lookup_formula, get_algorithm_list, get_auto_bands
 from .tasks import TaskNestedView
-from app.geoutils import geom_transform_wkt_bbox
+from app.geoutils import geom_transform_wkt_bbox, get_rasterio_to_meters_factor
 from rest_framework import exceptions
 from rest_framework.response import Response
 from worker.tasks import export_raster, export_pointcloud
 from django.utils.translation import gettext as _
 import warnings
+from functools import lru_cache
+from osgeo import osr
 
 # Disable: NotGeoreferencedWarning: Dataset has no geotransform, gcps, or rpcs. The identity matrix be returned.
 warnings.filterwarnings("ignore", category=NotGeoreferencedWarning)
@@ -47,9 +49,22 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 for custom_colormap in custom_colormaps:
     colormap = colormap.register(custom_colormap)
 
+@lru_cache(maxsize=128)
+def get_colormap_encoded_values(cmap):
+    values = colormap.get(cmap).values()
+    # values = [[R, G, B, A], [R, G, B, A], ...]
+    encoded_values = []
+    for rgba in values:
+        # Pack R, G, B, A (each 0-255) into a 32-bit integer
+        # Format: 0xRRGGBBAA (R in most significant byte)
+        encoded = (rgba[0] << 24) | (rgba[1] << 16) | (rgba[2] << 8) | rgba[3]
+        encoded_values.append(encoded)
 
+    return encoded_values
+    
 def get_zoom_safe(src_dst):
-    minzoom, maxzoom = src_dst.spatial_info["minzoom"], src_dst.spatial_info["maxzoom"]
+    # In rio-tiler 7.x, minzoom and maxzoom are properties, not in spatial_info dict
+    minzoom, maxzoom = src_dst.minzoom, src_dst.maxzoom
     if maxzoom < minzoom:
         maxzoom = minzoom
     return minzoom, maxzoom
@@ -93,7 +108,31 @@ def get_pointcloud_path(task):
     return task.get_asset_download_path("georeferenced_model.laz")
 
 
-class TileJson(TaskNestedView):
+class TilerTaskView(TaskNestedView):
+    """
+    Base view for tiler endpoints that need extent fields
+    Override queryset to not defer extent fields since they're needed for tile rendering
+    """
+    def get_and_check_task(self, request, pk, annotate={}):
+        # Import here to avoid circular import
+        from app import models
+        from django.core.exceptions import ObjectDoesNotExist, ValidationError
+        from .projects import get_and_check_project
+
+        try:
+            # Don't defer extent fields for tiler views
+            task = models.Task.objects.all().annotate(**annotate).get(pk=pk)
+        except (ObjectDoesNotExist, ValidationError):
+            raise exceptions.NotFound()
+
+        # Check for permissions, unless the task is public
+        if not (task.public or task.project.public):
+            get_and_check_project(request, task.project.id)
+
+        return task
+
+
+class TileJson(TilerTaskView):
     def get(self, request, pk=None, project_pk=None, tile_type=""):
         """
         Get tile.json for this tasks's asset type
@@ -119,7 +158,7 @@ class TileJson(TaskNestedView):
         })
 
 
-class Bounds(TaskNestedView):
+class Bounds(TilerTaskView):
     def get(self, request, pk=None, project_pk=None, tile_type=""):
         """
         Get the bounds for this tasks's asset type
@@ -132,7 +171,7 @@ class Bounds(TaskNestedView):
         })
 
 
-class Metadata(TaskNestedView):
+class Metadata(TilerTaskView):
     def get(self, request, pk=None, project_pk=None, tile_type=""):
         """
         Get the metadata for this tasks's asset type
@@ -171,8 +210,11 @@ class Metadata(TaskNestedView):
         raster_path = get_raster_path(task, tile_type)
         if not os.path.isfile(raster_path):
             raise exceptions.NotFound()
+
+        to_meter = 1.0
         try:
             with COGReader(raster_path) as src:
+
                 band_count = src.dataset.meta['count']
                 if boundaries_feature is not None:
                     cutline = create_cutline(src.dataset, boundaries_feature, CRS.from_string('EPSG:4326'))
@@ -188,27 +230,75 @@ class Metadata(TaskNestedView):
                 else:
                     vrt_options = None
 
+                if tile_type in ['dsm', 'dtm']:
+                    to_meter = get_rasterio_to_meters_factor(src.dataset)
+                    
+                    # WarpedVRT is really slow with compound CRSes
+                    # so we override the CRS to the 2D version for speed
+                    # in case there's one
+                    if vrt_options is None:
+                        vrt_options = {}
+
+                    if task.epsg is not None:
+                        vrt_options['src_crs'] = f"EPSG:{task.epsg}"
+
                 if has_alpha_band(src.dataset):
                     band_count -= 1
                 nodata = None
-                # Workaround for https://github.com/OpenDroneMap/WebODM/issues/894
+                # Workaround for https://github.com/WebODM/WebODM/issues/894
                 if tile_type == 'orthophoto':
                     nodata = 0
                 histogram_options = {"bins": 255, "range": hrange}
-                if expr is not None:
-                    data, mask = src.preview(expression=expr, vrt_options=vrt_options)
+                # If we have cropping/bounds or expression, use preview() with manual stats
+                if expr is not None or vrt_options is not None or bounds is not None:
+                    if expr is not None:
+                        data, mask = src.preview(expression=expr, vrt_options=vrt_options)
+                    else:
+                        # Use preview for cropped data
+                        data, mask = src.preview(vrt_options=vrt_options)
                     data = np.ma.array(data)
                     data.mask = mask == 0
                     stats = {
                         str(b + 1): raster_stats(data[b], percentiles=(pmin, pmax), bins=255, range=hrange)
                         for b in range(data.shape[0])
                     }
-                    stats = {b: ImageStatistics(**s) for b, s in stats.items()}
-                    metadata = RioMetadata(statistics=stats, **src.info().dict())
+                    # raster_stats returns a list with one dict per band, extract the first element
+                    stats = {b: BandStatistics(**s[0]) for b, s in stats.items()}
+                    # Get info dict and add minzoom/maxzoom from Reader properties
+                    info_dict = src.info().dict()
+                    info_dict['minzoom'] = src.minzoom
+                    info_dict['maxzoom'] = src.maxzoom
+                    metadata = RioMetadata(statistics=stats, **info_dict)
                 else:
-                    metadata = src.metadata(pmin=pmin, pmax=pmax, hist_options=histogram_options, nodata=nodata,
-                                            bounds=bounds, vrt_options=vrt_options)
+                    # In rio-tiler 7.x, use statistics() for simple case without cropping
+                    stats = src.statistics(
+                        percentiles=[pmin, pmax],
+                        hist_options=histogram_options
+                    )
+                    # Normalize band keys from "b1", "b2", etc. to "1", "2", etc. for frontend compatibility
+                    # rio-tiler 7.x returns keys as "b1", "b2", but frontend expects "1", "2"
+                    normalized_stats = {}
+                    for key, value in stats.items():
+                        if key.startswith('b') and key[1:].isdigit():
+                            normalized_stats[key[1:]] = value  # "b1" -> "1", "b2" -> "2", etc.
+                        else:
+                            normalized_stats[key] = value
+                    stats = normalized_stats
+                    # Get info dict and add minzoom/maxzoom from Reader properties
+                    info_dict = src.info().dict()
+                    info_dict['minzoom'] = src.minzoom
+                    info_dict['maxzoom'] = src.maxzoom
+                    metadata = RioMetadata(statistics=stats, **info_dict)
                 info = json.loads(metadata.json())
+
+                # Transform rio-tiler 7.x percentile format to legacy format for frontend compatibility
+                # Frontend expects percentiles as an array [percentile_2, percentile_98]
+                for b in info.get('statistics', {}):
+                    if 'percentile_2' in info['statistics'][b] and 'percentile_98' in info['statistics'][b]:
+                        info['statistics'][b]['percentiles'] = [
+                            info['statistics'][b]['percentile_2'],
+                            info['statistics'][b]['percentile_98']
+                        ]
         except IndexError as e:
             # Caught when trying to get an invalid raster metadata
             # or when the crop area is defined improperly. In order
@@ -224,8 +314,15 @@ class Metadata(TaskNestedView):
             for b in info['statistics']:
                 info['statistics'][b]['min'] = hrange[0]
                 info['statistics'][b]['max'] = hrange[1]
-                info['statistics'][b]['percentiles'][0] = max(hrange[0], info['statistics'][b]['percentiles'][0])
-                info['statistics'][b]['percentiles'][1] = min(hrange[1], info['statistics'][b]['percentiles'][1])
+                # In rio-tiler 7.x, percentiles are percentile_2 and percentile_98, not an array
+                if 'percentile_2' in info['statistics'][b]:
+                    info['statistics'][b]['percentile_2'] = max(hrange[0], info['statistics'][b]['percentile_2'])
+                if 'percentile_98' in info['statistics'][b]:
+                    info['statistics'][b]['percentile_98'] = min(hrange[1], info['statistics'][b]['percentile_98'])
+                # Update the percentiles array for frontend compatibility
+                if 'percentiles' in info['statistics'][b]:
+                    info['statistics'][b]['percentiles'][0] = info['statistics'][b]['percentile_2']
+                    info['statistics'][b]['percentiles'][1] = info['statistics'][b]['percentile_98']
 
         cmap_labels = {
             "viridis": "Viridis",
@@ -265,13 +362,22 @@ class Metadata(TaskNestedView):
         info['color_maps'] = []
         info['algorithms'] = algorithms
         info['auto_bands'] = auto_bands
+
+        if to_meter != 1.0:
+            for b in info['statistics']:
+                info['statistics'][b]['min'] *= to_meter
+                info['statistics'][b]['max'] *= to_meter
+                info['statistics'][b]['std'] *= to_meter
+                info['statistics'][b]['percentiles'][0] *= to_meter
+                info['statistics'][b]['percentiles'][1] *= to_meter
+                info['statistics'][b]['histogram'][1] = [n * to_meter for n in info['statistics'][b]['histogram'][1]]
         
         if colormaps:
             for cmap in colormaps:
                 try:
                     info['color_maps'].append({
                         'key': cmap,
-                        'color_map': colormap.get(cmap).values(),
+                        'color_map': get_colormap_encoded_values(cmap),
                         'label': cmap_labels.get(cmap, cmap)
                     })
                 except FileNotFoundError:
@@ -285,12 +391,16 @@ class Metadata(TaskNestedView):
             info['maxzoom'] = info['minzoom']
         info['maxzoom'] += ZOOM_EXTRA_LEVELS
         info['minzoom'] -= ZOOM_EXTRA_LEVELS
-        info['bounds'] = {'value': bounds if bounds is not None else src.bounds, 'crs': src.dataset.crs}
+        # Convert CRS object to string for JSON serialization
+        # In rio-tiler 7.x, use get_geographic_bounds() to get lat/lon bounds for Leaflet
+        if bounds is None:
+            bounds = src.get_geographic_bounds(CRS.from_epsg(4326))
+        info['bounds'] = {'value': bounds, 'crs': 'EPSG:4326'}
 
         return Response(info)
 
 
-class Tiles(TaskNestedView):
+class Tiles(TilerTaskView):
     def get(self, request, pk=None, project_pk=None, tile_type="", z="", x="", y="", scale=1, ext=None):
         """
         Get a tile image
@@ -369,10 +479,10 @@ class Tiles(TaskNestedView):
         if not os.path.isfile(url):
             raise exceptions.NotFound()
 
+        to_meter = 1.0
         with COGReader(url) as src:
-            if not src.tile_exists(z, x, y):
-                raise exceptions.NotFound(_("Outside of bounds"))
-
+            # In rio-tiler 7.x, tile_exists() can cause OverflowError with some TMS configurations
+            # Skip the check and rely on zoom level validation and TileOutsideBounds exception handling
             minzoom, maxzoom = get_zoom_safe(src)
             has_alpha = has_alpha_band(src.dataset)
             if z < minzoom - ZOOM_EXTRA_LEVELS or z > maxzoom + ZOOM_EXTRA_LEVELS:
@@ -393,6 +503,9 @@ class Tiles(TaskNestedView):
             else:
                 vrt_options = None
 
+            if tile_type in ['dsm', 'dtm']:
+                to_meter = get_rasterio_to_meters_factor(src.dataset)
+
             # Handle N-bands datasets for orthophotos (not plant health)
             if tile_type == 'orthophoto' and expr is None:
                 ci = src.dataset.colorinterp
@@ -411,7 +524,7 @@ class Tiles(TaskNestedView):
                 elif has_alpha:
                     indexes = non_alpha_indexes(src.dataset)
 
-            # Workaround for https://github.com/OpenDroneMap/WebODM/issues/894
+            # Workaround for https://github.com/WebODM/WebODM/issues/894
             if nodata is None and tile_type == 'orthophoto':
                 nodata = 0
 
@@ -423,21 +536,31 @@ class Tiles(TaskNestedView):
                 resampling = "bilinear"
                 padding = 16
 
+                # WarpedVRT is really slow with compound CRSes
+                # so we override the CRS to the 2D version for speed
+                # in case there's one
+                if vrt_options is None:
+                    vrt_options = {}
+
+                if task.epsg is not None:
+                    vrt_options['src_crs'] = f"EPSG:{task.epsg}"
+
             # Hillshading is not a local tile operation and
             # requires neighbor tiles to be rendered seamlessly
             if hillshade is not None:
                 tile_buffer = 16
 
             try:
+                # In rio-tiler 7.x, the parameter is 'buffer' not 'tile_buffer'
                 if expr is not None:
                     tile = src.tile(x, y, z, expression=expr, tilesize=tilesize, nodata=nodata,
                                     padding=padding,
-                                    tile_buffer=tile_buffer,
+                                    buffer=tile_buffer,
                                     resampling_method=resampling, vrt_options=vrt_options)
                 else:
                     tile = src.tile(x, y, z, indexes=indexes, tilesize=tilesize, nodata=nodata,
                                     padding=padding,
-                                    tile_buffer=tile_buffer,
+                                    buffer=tile_buffer,
                                     resampling_method=resampling, vrt_options=vrt_options)
             except TileOutsideBounds:
                 raise exceptions.NotFound(_("Outside of bounds"))
@@ -451,6 +574,8 @@ class Tiles(TaskNestedView):
             intensity = None
             try:
                 rescale_arr = list(map(float, rescale.split(",")))
+                if tile_type in ['dsm', 'dtm']:
+                    rescale_arr = [v / to_meter for v in rescale_arr]
             except ValueError:
                 raise exceptions.ValidationError(_("Invalid rescale value"))
 
@@ -460,10 +585,9 @@ class Tiles(TaskNestedView):
                 if np.equal(tile.mask, 255).all():
                     ext = "jpg"
                 else:
-                    if 'image/webp' in request.headers.get('Accept', ''):
-                        ext = "webp"
-                    else:
-                        ext = "png"
+                    # In some GDAL builds, WEBP driver may not be available
+                    # Use PNG as a universally supported format
+                    ext = "png"
 
             driver = "jpeg" if ext == "jpg" else ext
 
@@ -537,6 +661,7 @@ class Export(TaskNestedView):
         rescale = request.data.get('rescale')
         export_format = request.data.get('format', 'laz' if asset_type == 'georeferenced_model' else 'gtiff')
         epsg = request.data.get('epsg')
+        proj = request.data.get('proj')
         color_map = request.data.get('color_map')
         hillshade = request.data.get('hillshade')
         resample = request.data.get('resample', 0)
@@ -545,9 +670,13 @@ class Export(TaskNestedView):
         if bands == '': bands = None
         if rescale == '': rescale = None
         if epsg == '': epsg = None
+        if proj == '': proj = None
         if color_map == '': color_map = None
         if hillshade == '': hillshade = None
         if resample == '': resample = 0
+
+        if epsg is not None:
+            proj = None
 
         expr = None
 
@@ -581,6 +710,14 @@ class Export(TaskNestedView):
             except ValueError:
                 raise exceptions.ValidationError(_("Invalid EPSG code: %(value)s") % {'value': epsg})
         
+        if proj is not None:
+            try:
+                srs = osr.SpatialReference()
+                if srs.ImportFromProj4(proj) != 0:
+                    raise exceptions.ValidationError(_("Invalid PROJ string: %(value)s") % {'value': proj})
+            except Exception as e:
+                raise exceptions.ValidationError(_("Invalid PROJ string: %(value)s") % {'value': proj})
+
         if (formula and not bands) or (not formula and bands):
             raise exceptions.ValidationError(_("Both formula and bands parameters are required"))
 
@@ -623,7 +760,7 @@ class Export(TaskNestedView):
         if not os.path.isfile(url):
             raise exceptions.NotFound()
 
-        if epsg is not None and task.epsg is None:
+        if epsg is not None and (task.epsg is None and task.wkt is None):
             raise exceptions.ValidationError(_("Cannot use epsg on non-georeferenced dataset"))
         
         # Strip unsafe chars, append suffix
@@ -636,10 +773,11 @@ class Export(TaskNestedView):
 
         if asset_type in ['orthophoto', 'dsm', 'dtm']:
             # Shortcut the process if no processing is required
-            if export_format == 'gtiff' and (epsg == task.epsg or epsg is None) and expr is None and task.crop is None:
+            if export_format == 'gtiff' and ((task.epsg is not None and epsg == task.epsg) or epsg is None) and (proj is None) and expr is None and task.crop is None:
                 return Response({'url': '/api/projects/{}/tasks/{}/download/{}.tif'.format(task.project.id, task.id, asset_type), 'filename': filename})
             else:
-                celery_task_id = export_raster.delay(url, epsg=epsg, 
+                celery_task_id = export_raster.delay(url, epsg=epsg,
+                                                        proj=proj, 
                                                         expression=expr, 
                                                         format=export_format, 
                                                         rescale=rescale, 
@@ -651,10 +789,11 @@ class Export(TaskNestedView):
                 return Response({'celery_task_id': celery_task_id, 'filename': filename})
         elif asset_type == 'georeferenced_model':
             # Shortcut the process if no processing is required
-            if export_format == 'laz' and (epsg == task.epsg or epsg is None) and (resample is None or resample == 0) and task.crop is None:
+            if export_format == 'laz' and ((task.epsg is not None and epsg == task.epsg) or epsg is None) and (proj is None) and (resample is None or resample == 0) and task.crop is None:
                 return Response({'url': '/api/projects/{}/tasks/{}/download/{}.laz'.format(task.project.id, task.id, asset_type), 'filename': filename})
             else:
-                celery_task_id = export_pointcloud.delay(url, epsg=epsg, 
+                celery_task_id = export_pointcloud.delay(url, epsg=epsg,
+                                                            proj=proj, 
                                                             format=export_format,
                                                             resample=resample,
                                                             crop=task.crop.wkt if task.crop is not None else None,

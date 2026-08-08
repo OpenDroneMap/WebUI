@@ -8,12 +8,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from guardian.shortcuts import get_objects_for_user
 
 from nodeodm.models import ProcessingNode
-from app.models import Project, Task
+from app.models import Project, Task, Basemap
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django import forms
-from app.views.utils import get_permissions
+from app.views.utils import get_permissions, get_project_or_raise, get_task_or_raise, handle_302, ResponseClusterRedirect, cluster_mode
 from webodm import settings
 
 def index(request):
@@ -37,6 +37,10 @@ def index(request):
 
 @login_required
 def dashboard(request):
+    if cluster_mode():    
+        if request.user.profile.cluster_id is not None and request.user.profile.cluster_id != settings.CLUSTER_ID:
+            return ResponseClusterRedirect(request, request.user.profile.cluster_id)
+    
     no_processingnodes = ProcessingNode.objects.count() == 0
     if no_processingnodes and settings.PROCESSING_NODES_ONBOARDING is not None:
         return redirect(settings.PROCESSING_NODES_ONBOARDING)
@@ -57,22 +61,24 @@ def dashboard(request):
         'no_tasks': no_tasks,
         'onboarding': settings.DASHBOARD_ONBOARDING,
         'params': {
-            'permissions': json.dumps(permissions)
+            'permissions': json.dumps(permissions),
+            'basemaps': json.dumps(Basemap.get_cached_basemaps())
         }.items()
     })
 
 
 @login_required
+@handle_302
 def map(request, project_pk=None, task_pk=None):
     title = _("Map")
 
     if project_pk is not None:
-        project = get_object_or_404(Project, pk=project_pk)
+        project = get_project_or_raise(pk=project_pk)
         if not request.user.has_perm('app.view_project', project):
             raise Http404()
         
         if task_pk is not None:
-            task = get_object_or_404(Task.objects.defer('orthophoto_extent', 'dsm_extent', 'dtm_extent'), pk=task_pk, project=project)
+            task = get_task_or_raise(pk=task_pk, project=project)
             title = task.name or task.id
             mapItems = [task.get_map_items()]
             projectInfo = None
@@ -87,24 +93,26 @@ def map(request, project_pk=None, task_pk=None):
                 'map-items': json.dumps(mapItems),
                 'title': title,
                 'public': 'false',
-                'share-buttons': 'false' if settings.DESKTOP_MODE else 'true',
+                'share-buttons': 'true',
                 'permissions': json.dumps(get_permissions(request.user, project)),
                 'project': json.dumps(projectInfo),
+                'basemaps': json.dumps(Basemap.get_cached_basemaps()),
             }.items()
         })
 
 
 @login_required
+@handle_302
 def model_display(request, project_pk=None, task_pk=None):
     title = _("3D Model Display")
 
     if project_pk is not None:
-        project = get_object_or_404(Project, pk=project_pk)
+        project = get_project_or_raise(pk=project_pk)
         if not request.user.has_perm('app.view_project', project):
             raise Http404()
 
         if task_pk is not None:
-            task = get_object_or_404(Task.objects.defer('orthophoto_extent', 'dsm_extent', 'dtm_extent'), pk=task_pk, project=project)
+            task = get_task_or_raise(pk=task_pk, project=project)
             title = task.name or task.id
         else:
             raise Http404()
@@ -114,7 +122,7 @@ def model_display(request, project_pk=None, task_pk=None):
             'params': {
                 'task': json.dumps(task.get_model_display_params()),
                 'public': 'false',
-                'share-buttons': 'false' if settings.DESKTOP_MODE else 'true'
+                'share-buttons': 'true'
             }.items()
         })
 

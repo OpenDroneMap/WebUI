@@ -28,7 +28,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Check GDAL version
-python -c "import sys;import re;import subprocess;version = subprocess.Popen([\"gdalinfo\", \"--version\"], stdout=subprocess.PIPE).communicate()[0].decode().rstrip();ret = 0 if re.compile('^GDAL [2-9]\.[0-9]+').match(version) else 1; print('Checking GDAL version... ' + ('{}, excellent!'.format(version) if ret == 0 else version));sys.exit(ret);"
+python -c "import sys;import re;import subprocess;version = subprocess.Popen([\"gdalinfo\", \"--version\"], stdout=subprocess.PIPE).communicate()[0].decode().rstrip();ret = 0 if re.compile(r'^GDAL [2-9]\.[0-9]+').match(version) else 1; print('Checking GDAL version... ' + ('{}, excellent!'.format(version) if ret == 0 else version));sys.exit(ret);"
 if [ $? -ne 0 ]; then
 	almost_there
     echo -e "\033[33mYour system is currently using a version of GDAL that is too old, or GDAL is not installed. You need to install or configure your system to use GDAL 2.1 or higher. If you have installed multiple versions of GDAL, make sure the newer one takes priority in your PATH environment variable.\033[39m"
@@ -59,17 +59,15 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ]; then
     webpack --watch &
 fi
 
+
+mkdir -p /webodm/app/media/tmp
+mkdir -p /webodm/app/media_test/tmp
+ 
 echo Running migrations
 python manage.py migrate
 
 if [[ "$WO_DEFAULT_NODES" > 0 ]]; then
-    i=0
-    while [ $i -ne "$WO_DEFAULT_NODES" ]
-    do
-        i=$(($i+1))
-        NODE_HOST=$(python manage.py getnodehostname webodm_node-odm_$i)
-        python manage.py addnode $NODE_HOST 3000 --label node-odm-$i
-    done
+    python manage.py addnode node-odm-1 3000 --label node-odm-1
 fi
 
 if [[ "$WO_CREATE_MICMAC_PNODE" = "YES" ]]; then
@@ -154,7 +152,7 @@ else
     congrats
 
     nginx -c $(pwd)/nginx/$conf
-    gunicorn webodm.wsgi --bind unix:/tmp/gunicorn.sock --timeout 300000 --max-requests 500 --workers $WEB_CONCURRENCY --preload
+    gunicorn webodm.wsgi --bind unix:/tmp/gunicorn.sock --timeout 300000 --max-requests 5000 --workers $WEB_CONCURRENCY --preload
 fi
 
 # If this is executed, it means the previous command failed, don't display the congratulations message

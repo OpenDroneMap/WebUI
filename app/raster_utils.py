@@ -107,6 +107,7 @@ def export_raster(input, output, progress_callback=None, **opts):
             last_update = t
 
     epsg = opts.get('epsg')
+    proj = opts.get('proj')
     expression = opts.get('expression')
     export_format = opts.get('format')
     rescale = opts.get('rescale')
@@ -142,6 +143,7 @@ def export_raster(input, output, progress_callback=None, **opts):
     with COGReader(input) as ds_src:
         src = ds_src.dataset
         profile = src.meta.copy()
+        units = ds_src.dataset.units
         win = Window(0, 0, src.width, src.height)
             
         # Output format
@@ -154,7 +156,7 @@ def export_raster(input, output, progress_callback=None, **opts):
         indexes = src.indexes
         output_raster = output
         jpg_background = 255 # white
-        reproject = src.crs is not None and epsg is not None and src.crs.to_epsg() != epsg
+        reproject = src.crs is not None and ((epsg is not None and src.crs.to_epsg() != epsg) or proj is not None)
 
         # KMZ is special, we just export it as GeoTIFF
         # and then call GDAL to tile/package it
@@ -175,6 +177,10 @@ def export_raster(input, output, progress_callback=None, **opts):
                 export_format = 'gtiff-rgb'
                 path_base, _ = os.path.splitext(output)
                 output_raster = path_base + ".png.tif"
+
+        JPEG_PX_LIMIT = 65000 # Due to 16bit fields for w,h in JPEG standard
+        if jpg and (src.width > JPEG_PX_LIMIT or src.height > JPEG_PX_LIMIT):
+            raise Exception(f"Image is too large (> {JPEG_PX_LIMIT}px) for JPEG. Use TIFF (RGB) instead.")
 
         if export_format == "jpg":
             driver = "JPEG"
@@ -213,11 +219,9 @@ def export_raster(input, output, progress_callback=None, **opts):
 
         if rgb and rescale is None:
             # Compute min max
-            nodata = None
-            if asset_type == 'orthophoto':
-                nodata = 0
-            md = ds_src.metadata(pmin=2.0, pmax=98.0, hist_options={"bins": 255}, nodata=nodata)
-            rescale = [md['statistics']['1']['min'], md['statistics']['1']['max']]
+            # In rio-tiler 7.x, use statistics() instead of metadata()
+            stats = ds_src.statistics(percentiles=[2.0, 98.0], hist_options={"bins": 255})
+            rescale = [stats['1'].min, stats['1'].max]
 
         ci = src.colorinterp
         alpha_index = None
@@ -239,6 +243,9 @@ def export_raster(input, output, progress_callback=None, **opts):
                                 ci.index(ColorInterp.green) + 1,
                                 ci.index(ColorInterp.blue) + 1,
                                 ci.index(ColorInterp.alpha) + 1)
+                # No? pick first three + alpha
+                elif ColorInterp.alpha in ci:
+                    indexes = (1, 2, 3, ci.index(ColorInterp.alpha) + 1)
             
             # Only 2 bands (common with thermal)?
             elif len(ci) == 2 and ColorInterp.gray in ci and ColorInterp.alpha in ci:
@@ -349,6 +356,10 @@ def export_raster(input, output, progress_callback=None, **opts):
         elif dem:
             # Apply hillshading, colormaps to elevation
             with rasterio.open(output_raster, 'w', **profile) as dst:
+                # Copy units information
+                if export_format == "gtiff" and not rgb and len(units) == len(dst.units):
+                    dst.units = units
+
                 for idx, (w, dst_w) in enumerate(subwins):
                     p(f"Processing tile {idx}/{num_wins}", progress_per_win)
 
@@ -422,9 +433,14 @@ def export_raster(input, output, progress_callback=None, **opts):
         elif reproject:
             output_vrt = path_base + ".vrt"
 
+            if epsg is not None:
+                t_srs = f"EPSG:{epsg}"
+            elif proj is not None:
+                t_srs = proj
+
             subprocess.check_output(["gdalwarp", "-r", "near" if resampling == "nearest" else resampling, 
                                     "-of", "VRT",
-                                    "-t_srs", f"EPSG:{epsg}",
+                                    "-t_srs", t_srs,
                                     output_raster, output_vrt])
             gt_args = ["-r", resampling, "--config", "GDAL_CACHEMAX", "25%"]
             if bigtiff and not jpg and not png:

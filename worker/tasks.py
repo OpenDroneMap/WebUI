@@ -3,7 +3,7 @@ import shutil
 import tempfile
 import traceback
 import json
-import socket
+import requests
 
 import time
 from threading import Event, Thread
@@ -40,23 +40,6 @@ def update_nodes_info():
     processing_nodes = ProcessingNode.objects.all()
     for processing_node in processing_nodes:
         processing_node.update_node_info()
-
-        # Workaround for mysterious "webodm_node-odm-1" or "webodm-node-odm-1" hostname switcharoo on Mac
-        # Technically we already check for the correct hostname during setup, 
-        # but sometimes that doesn't work?
-        check_hostname = 'webodm_node-odm-1'
-        if processing_node.hostname == check_hostname and not processing_node.is_online():
-            try:
-                socket.gethostbyname(processing_node.hostname)
-            except:
-                # Hostname was invalid, try renaming
-                processing_node.hostname = 'webodm-node-odm-1'
-                processing_node.update_node_info()
-                if processing_node.is_online():
-                    logger.info("Found and fixed webodm_node-odm-1 hostname switcharoo")
-                else:
-                    processing_node.hostname = check_hostname
-                processing_node.save()
 
 @app.task(ignore_result=True)
 def cleanup_projects():
@@ -175,8 +158,8 @@ def process_task(taskId):
             task.process()
         except Exception as e:
             logger.error(
-                "Uncaught error! This is potentially bad. Please report it to http://github.com/OpenDroneMap/WebODM/issues: {} {}".format(
-                    e, traceback.format_exc()))
+                "Uncaught error while processing task {}. This is potentially bad. Please report it to http://github.com/WebODM/WebODM/issues: {} {}".format(
+                    taskId, e, traceback.format_exc()))
             if settings.TESTING: raise e
     finally:
         if cancel_monitor is not None:
@@ -204,9 +187,9 @@ def get_pending_tasks():
 
 @app.task(ignore_result=True)
 def process_pending_tasks():
-    tasks = get_pending_tasks()
-    for task in tasks:
-        process_task.delay(task.id)
+    task_ids = get_pending_tasks().values_list('id', flat=True)
+    for task_id in task_ids:
+        process_task.delay(task_id)
 
 
 @app.task(bind=True, time_limit=settings.WORKERS_MAX_TIME_LIMIT)
@@ -253,6 +236,27 @@ def check_quotas():
             deadline = p.get_quota_deadline()
             if deadline is None:
                 deadline = p.set_quota_deadline(settings.QUOTA_EXCEEDED_GRACE_PERIOD)
+
+                # Notify hook if needed
+                if settings.QUOTA_EXCEEDED_NOTIFY_URL is not None:
+                    for i in range(1, 11):
+                        try:
+                            r = requests.post(
+                                settings.QUOTA_EXCEEDED_NOTIFY_URL,
+                                json={
+                                    'username': p.user.username,
+                                    'quota_used': p.used_quota(),
+                                    'quota_total': p.quota,
+                                    'deadline': deadline
+                                },
+                                timeout=10
+                            )
+                            r.raise_for_status()
+                            break
+                        except:
+                            logger.warning(f"Failed to notify quota exceeded (attempt {i}): {str(e)}")
+                            time.sleep(i * 2)
+
             now = time.time()
             if now > deadline:
                 # deadline passed, delete tasks until quota is met
