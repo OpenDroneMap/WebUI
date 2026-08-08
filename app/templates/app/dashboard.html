@@ -14,7 +14,7 @@
 
 		<h3>{% trans 'Welcome!' %} ☺</h3>
 		{% trans 'Add a Processing Node' as add_processing_node %}
-		{% with nodeodm_link='<a href="https://github.com/OpenDroneMap/NodeODM" target="_blank">NodeODM</a>' api_link='<a href="https://github.com/OpenDroneMap/NodeODM/blob/master/docs/index.adoc" target="_blank">API</a>' %}
+		{% with nodeodm_link='<a href="https://github.com/WebODM/NodeODM" target="_blank">NodeODM</a>' api_link='<a href="https://github.com/WebODM/NodeODM/blob/master/docs/index.adoc" target="_blank">API</a>' %}
 			<p>
 			{% blocktrans %}To get started, "{{ add_processing_node }}". A processing node is a computer running an instance of {{ nodeodm_link }} or some other software implementing this {{ api_link }}.{% endblocktrans %}
 			</p>
@@ -35,7 +35,7 @@
 					<li>{% trans 'You need at least 5 images, but 16-32 is typically the minimum.' %}</li>
 					<li>{% trans 'Images must overlap by 65% or more. Aim for 70-72%' %}</li>
 					<li>{% trans 'For great 3D, images must overlap by 83%' %}</li>
-					<li>{% gcp_docs_link as gcp_link %}{% blocktrans with link_start=gcp_link|safe link_end='</a>' %}A {{link_start}}GCP File{{link_end}} is optional, but can increase georeferencing accuracy{% endblocktrans %}</li>
+					<li>{% gcp_docs_link as gcp_link %}{% blocktrans with link_start='<a href="'|add:gcp_link|add:'">'|safe link_end='</a>' %}A {{link_start}}GCP File{{link_end}} is optional, but can increase georeferencing accuracy{% endblocktrans %}</li>
 				</ul>
 			</p>
 		{% endif %}
@@ -60,7 +60,7 @@
 				<div class="placeholder-item pulse border shimmer" style="height: 100px; margin-top: 16px; width: 100%;"></div>
 			</div>
 		</div>
-		
+
 	{% endif %}
 
 	{% load render_bundle from webpack_loader %}

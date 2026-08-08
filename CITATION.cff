@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "You can cite the software as below."
+authors:
+- family-names: "Toffanin"
+  given-names: "Piero"
+  orcid: "https://orcid.org/0000-0001-9450-993X"
+- name: "WebODM Contributors"
+title: "WebODM: User-friendly, commercial-grade software for processing aerial imagery."
+doi: 10.5281/zenodo.3965771
+url: "https://github.com/WebODM/WebODM"

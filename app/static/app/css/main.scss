@@ -1,6 +1,9 @@
 html, body, section.main, .content, #wrapper, #page-wrapper{
     height: auto;
 }
+a:focus{
+    outline: none;
+}
 #page-wrapper{
     margin-top: 1px;
     padding-bottom: 8px;
@@ -94,7 +97,10 @@ html, body, section.main, .content, #wrapper, #page-wrapper{
         }
 
         li{
-            word-break: break-word;
+            overflow: hidden;
+            a{
+                word-break: auto-phrase;
+            }
         }
     }
 

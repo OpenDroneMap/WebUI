@@ -1,0 +1,15 @@
+{% if widget.is_initial %}
+    {% if not widget.required %}
+        <span class="clearable-file-input">
+            <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}">
+            <label for="{{ widget.checkbox_id }}">{{ widget.clear_checkbox_label }}</label>
+        </span><br>
+    {% endif %}
+    {{ widget.input_text }}:
+{% endif %}
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+<style type="text/css">
+.field-app_logo_preview label,.field-restore_default_logo label{
+    display: none !important;
+}
+</style>

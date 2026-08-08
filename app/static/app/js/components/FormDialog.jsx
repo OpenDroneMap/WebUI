@@ -12,7 +12,8 @@ class FormDialog extends React.Component {
         savingLabel: _("Saving…"),
         saveIcon: "glyphicon glyphicon-plus",
         deleteWarning: _("Are you sure?"),
-        show: false
+        show: false,
+        showFooter: true
     };
 
     static propTypes = {
@@ -31,7 +32,8 @@ class FormDialog extends React.Component {
             PropTypes.string,
             PropTypes.bool
         ]),
-        show: PropTypes.bool
+        show: PropTypes.bool,
+        showFooter: PropTypes.bool
     };
 
     constructor(props){
@@ -41,6 +43,7 @@ class FormDialog extends React.Component {
             showModal: props.show,
             saving: false,
             deleting: false,
+            saveProgress: null,
             error: ""
         };
 
@@ -90,7 +93,7 @@ class FormDialog extends React.Component {
 
     show(){
         if (this.props.reset) this.props.reset();
-        this.setState({showModal: true, saving: false, error: ""});
+        this.setState({showModal: true, saving: false, error: "", saveProgress: null});
     }
 
     hide(){
@@ -102,6 +105,11 @@ class FormDialog extends React.Component {
         }
     }
 
+    updateSaveProgress = progress => {
+        if (progress === undefined) progress = null;
+        this.setState({saveProgress: progress});
+    }
+
     handleEnter = e => {
         if (e.key === 'Enter' || e.keyCode === 13){
           this.handleSave(e);
@@ -111,7 +119,7 @@ class FormDialog extends React.Component {
     handleSave(e){
         e.preventDefault();
 
-        this.setState({saving: true, error: ""});
+        this.setState({saving: true, error: "", saveProgress: null});
 
         if (this.props.handleSaveFunction){
             this.props.handleSaveFunction(err => {
@@ -194,13 +202,13 @@ class FormDialog extends React.Component {
                       {this.props.children}
                     </div>
                   </div>
-                  <div className="modal-footer">
+                  {this.props.showFooter ? <div className="modal-footer">
                     <div className="pull-right">
                         <button type="button" className="btn btn-default" onClick={this.hide} disabled={this.state.saving}>{_("Cancel")}</button>
-                        <button type="button" className="btn btn-primary save" onClick={this.handleSave} disabled={this.state.saving}>
+                        <button type="button" className="btn btn-primary save" onClick={this.handleSave} disabled={this.state.saving} ref={(domNode) => this.saveButton = domNode}>
                             {this.state.saving ? 
                                 <span>
-                                    <i className="fa fa-circle-notch fa-spin"></i> {this.props.savingLabel}
+                                    <i className="fa fa-circle-notch fa-spin"></i> {this.props.savingLabel}{this.state.saveProgress !== null ? ` (${this.state.saveProgress.toFixed(0)}%)` : ""}
                                 </span>
                             :   <span>
                                     <i className={this.props.saveIcon}></i> {this.props.saveLabel}
@@ -213,7 +221,7 @@ class FormDialog extends React.Component {
                             {leftButtons}
                         </div>
                     : ""}
-                  </div>
+                  </div> : ""}
                 </div>
               </div>
             </div>

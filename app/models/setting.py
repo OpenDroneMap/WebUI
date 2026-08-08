@@ -30,6 +30,7 @@ class Setting(models.Model):
 
     organization_name = models.CharField(default='OpenDroneMap', max_length=255, blank=True, null=True, help_text=_("The name of your organization"), verbose_name=_("Organization name"))
     organization_website = models.URLField(default='https://opendronemap.org', max_length=255, blank=True, null=True, help_text=_("The website URL of your organization"), verbose_name=_("Organization website"))
+
     theme = models.ForeignKey(Theme, blank=False, null=False, on_delete=models.DO_NOTHING, verbose_name=_("Theme"),
                               help_text=_("Active theme"))
 
@@ -79,7 +80,7 @@ class Setting(models.Model):
 
 @receiver(signals.pre_save, sender=Setting, dispatch_uid="setting_pre_save")
 def setting_pre_save(sender, instance, **kwargs):
-    if Setting.objects.count() > 0 and instance.id != Setting.objects.get().id:
+    if Setting.objects.exists() and instance.id != Setting.objects.get().id:
         raise ValidationError("Can only create 1 %s instance" % Setting.__name__)
 
 

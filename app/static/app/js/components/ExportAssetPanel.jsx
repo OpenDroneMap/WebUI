@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import '../css/ExportAssetPanel.scss';
 import ErrorMessage from './ErrorMessage';
 import Storage from '../classes/Storage';
-import { _ } from '../classes/gettext';
+import { _, interpolate } from '../classes/gettext';
 import Utils from '../classes/Utils';
 import Workers from '../classes/Workers';
 
@@ -54,15 +54,15 @@ export default class ExportAssetPanel extends React.Component {
         },
         'laz': {
             label: "LAZ",
-            icon: "fa fa-cube"
+            icon: "fa fa-braille"
         },
         'las': {
             label: "LAS",
-            icon: "fa fa-cube"
+            icon: "fa fa-braille"
         },
         'ply': {
             label: "PLY",
-            icon: "fa fa-cube"
+            icon: "fa fa-braille"
         },
         'csv': {
             label: "CSV",
@@ -73,8 +73,9 @@ export default class ExportAssetPanel extends React.Component {
     this.state = {
         error: "",
         format: props.exportFormats[0],
-        epsg: this.props.task.epsg || null,
-        customEpsg: Storage.getItem("last_export_custom_epsg") || "4326",
+        epsg: this.props.task.epsg || "",
+        customEpsg: Storage.getItem("last_export_custom_epsg") || "3857",
+        customProj: Storage.getItem("last_export_custom_proj") || "",
         resample: 0,
         exporting: false,
         progress: null
@@ -84,7 +85,13 @@ export default class ExportAssetPanel extends React.Component {
   
 
   getEpsg = () => {
-    return this.state.epsg !== "custom" ? this.state.epsg : this.state.customEpsg;
+    if (this.state.epsg !== "proj"){
+      return this.state.epsg !== "custom" ? this.state.epsg : this.state.customEpsg;
+    }
+  }
+
+  getProj = () => {
+    if (this.state.epsg === "proj") return this.state.customProj;
   }
 
   handleSelectFormat = e => {
@@ -97,6 +104,10 @@ export default class ExportAssetPanel extends React.Component {
 
   handleChangeCustomEpsg = e => {
     this.setState({customEpsg: e.target.value});
+  }
+  
+  handleChangeCustomProj = e => {
+    this.setState({customProj: e.target.value});
   }
 
   handleChangeResample = e => {
@@ -117,6 +128,9 @@ export default class ExportAssetPanel extends React.Component {
       const epsg = this.getEpsg();
       if (epsg) params.epsg = this.getEpsg();
 
+      const proj = this.getProj();
+      if (proj) params.proj = this.getProj();
+
       if (this.state.resample > 0) params.resample = this.state.resample;
 
       return params;
@@ -129,14 +143,16 @@ export default class ExportAssetPanel extends React.Component {
   handleExport = (format) => {
     if (!format) format = this.state.format;
 
-    return (cb) => {
+    return (cb, onProgress) => {
         if (typeof cb !== 'function') cb = undefined;
+        if (typeof onProgress !== 'function') onProgress = undefined;
         
         const { task } = this.props;
         this.setState({exporting: true, error: "", progress: null});
         const data = this.getExportParams(format);
 
-        if (this.state.epsg === "custom") Storage.setItem("last_export_custom_epsg", data.epsg);
+        if (this.state.epsg === "custom" && data.epsg) Storage.setItem("last_export_custom_epsg", data.epsg);
+        if (this.state.epsg === "proj" && data.proj) Storage.setItem("last_export_custom_proj", data.proj);
         
         this.exportReq = $.ajax({
                 type: 'POST',
@@ -155,6 +171,7 @@ export default class ExportAssetPanel extends React.Component {
                         }
                     }, (_, progress) => {
                       this.setState({progress});
+                      if (onProgress !== undefined) onProgress(progress);
                     });
                 }else if (result.url){
                     // Simple download
@@ -185,20 +202,43 @@ export default class ExportAssetPanel extends React.Component {
   }
 
   render(){
-    const {epsg, customEpsg, exporting, format, resample, progress } = this.state;
+    const {epsg, customEpsg, customProj, exporting, format, resample, progress } = this.state;
     const { exportFormats } = this.props;
-    const utmEPSG = this.props.task.epsg;
+    const projEPSG = this.props.task.epsg;
+    const projWKT = this.props.task.wkt;
+    const georeferenced = this.props.task.epsg || this.props.task.wkt;
+    let projSrsName = this.props.task.srs?.name;
+    if (!projSrsName && projEPSG) projSrsName = `EPSG:${projEPSG}`;
+    else if (projSrsName && projEPSG) projSrsName = `${projSrsName} (EPSG:${projEPSG})`;
 
-    const disabled = (epsg === "custom" && !customEpsg) || exporting;
+    let resampleUnits = _("Meters").toLowerCase();
+    if (this.props.task.srs?.units != "m") resampleUnits = _("Feet").toLowerCase();
 
-    let projection = utmEPSG ? (<div><div className="row form-group form-inline">
-    <label className="col-sm-3 control-label">{_("Projection:")}</label>
+    const disabled = (epsg === "custom" && !customEpsg) || 
+                     (epsg === "proj" && (!customProj || (typeof customProj === "string" && !customProj.toLowerCase().startsWith("+proj")))) || 
+                     exporting;
+
+    let firstOpt = "";
+    let title = "";
+
+    if (projEPSG){
+      firstOpt = (<option value={projEPSG}>{projSrsName}</option>);
+    }else if (projWKT){
+      firstOpt = (<option value={""}>{projSrsName}</option>);
+    }
+
+    if (epsg == projEPSG) title = projSrsName;
+    else if (epsg == "" && projWKT) title = projWKT;
+
+    let projection = georeferenced ? (<div><div className="row form-group form-inline">
+    <label className="col-sm-3 control-label">{_("CRS:")}</label>
     <div className="col-sm-9 ">
-      <select className="form-control" value={epsg} onChange={this.handleSelectEpsg}>
-        {utmEPSG ? <option value={utmEPSG}>UTM (EPSG:{utmEPSG})</option> : ""}
+      <select className="form-control crs" value={epsg} onChange={this.handleSelectEpsg} title={title}>
+        {firstOpt}
         <option value="4326">{_("Lat/Lon")} (EPSG:4326)</option>
         <option value="3857">{_("Web Mercator")} (EPSG:3857)</option>
         <option value="custom">{_("Custom")} EPSG</option>
+        <option value="proj">{_("Custom")} PROJ</option>
       </select>
     </div>
   </div>
@@ -207,6 +247,14 @@ export default class ExportAssetPanel extends React.Component {
       <label className="col-sm-3 control-label">EPSG:</label>
       <div className="col-sm-9 ">
         <input type="number" className="form-control custom-interval" value={customEpsg} onChange={this.handleChangeCustomEpsg} />
+      </div>
+    </div>
+  : ""}
+  {epsg === "proj" ? 
+    <div className="row form-group form-inline">
+      <label className="col-sm-3 control-label">PROJ:</label>
+      <div className="col-sm-9 ">
+        <input type="text" className="form-control control-proj" value={customProj} onChange={this.handleChangeCustomProj} />
       </div>
     </div>
   : ""}
@@ -223,7 +271,7 @@ export default class ExportAssetPanel extends React.Component {
         </div>
     </div>,
     this.isPointCloud() ? <div key={2} className="row form-group form-inline">
-        <label className="col-sm-3 control-label">{_("Resample (meters):")}</label>
+        <label className="col-sm-3 control-label">{interpolate(_("Resample (%(unit)s):"), { unit: resampleUnits })}</label>
         <div className="col-sm-9 ">
           <input type="number" min="0" className="form-control custom-interval" value={resample} onChange={this.handleChangeResample} />
         </div>

@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import './css/Dashboard.scss';
 import ProjectList from './components/ProjectList';
 import EditProjectDialog from './components/EditProjectDialog';
+import Storage from './classes/Storage';
 import Utils from './classes/Utils';
+import Toaster from './components/Toaster';
 import {
   BrowserRouter as Router,
   Route
@@ -11,12 +13,15 @@ import {
 import $ from 'jquery';
 import { _ } from './classes/gettext';
 
+
 class Dashboard extends React.Component {
   static defaultProps = {
-    permissions: []
+    permissions: [],
+    basemaps: []
   };
   static propTypes = {
     permissions: PropTypes.array.isRequired,
+    basemaps: PropTypes.array
   };
 
   constructor(props){
@@ -52,6 +57,7 @@ class Dashboard extends React.Component {
       let q = Utils.queryParams(location);
       if (q.page === undefined) q.page = 1;
       else q.page = parseInt(q.page);
+      if (q.ordering === undefined) q.ordering = Storage.getItem("project_ordering") || "";
 
       return <ProjectList
                 source={`/api/projects/${Utils.toSearchQuery(q)}`}
@@ -59,11 +65,12 @@ class Dashboard extends React.Component {
                 currentPage={q.page}
                 currentSearch={q.search}
                 history={history}
+                basemaps={this.props.basemaps}
                 />;
     };
 
 
-    return (
+    return [
       <Router basename="/dashboard">
         <div>
           {this.props.permissions.indexOf("add_project") !== -1 ? 
@@ -82,8 +89,9 @@ class Dashboard extends React.Component {
             />
           <Route path="/" component={projectList} />
         </div>
-      </Router>
-    );
+      </Router>,
+      <Toaster />
+    ];
   }
 }
 

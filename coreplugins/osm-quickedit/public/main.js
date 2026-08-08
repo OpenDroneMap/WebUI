@@ -3,10 +3,6 @@
 // and covered by a BSD 2-Clause License
 
 PluginsAPI.Map.addActionButton(function (options) {
-  if (options.tiles.length === 1) {
-    // maps that display multiple tasks don't have a share option on the page
-    // and so we can't set things up to edit them
-
     var tile = options.tiles[0];
     var tileUrl =
       window.location.protocol +
@@ -103,8 +99,9 @@ PluginsAPI.Map.addActionButton(function (options) {
         }
 
         function prepareJOSM() {
+          var taskTitle = tile.meta.task.name || tile.meta.task.id;
           var imageryParams = {
-            title: tile.meta.name,
+            title: encodeURIComponent(taskTitle),
             type: "tms",
             max_zoom: 24,
             url: encodeURIComponent(tileUrl),
@@ -122,7 +119,7 @@ PluginsAPI.Map.addActionButton(function (options) {
             right: options.map.getBounds().getEast(),
             top: options.map.getBounds().getNorth(),
             changeset_comment: "",
-            changeset_source: encodeURIComponent("WebODM - " + tile.meta.name),
+            changeset_source: encodeURIComponent("WebODM - " + taskTitle),
             new_layer: false,
           };
           sendJOSMCmd("http://127.0.0.1:8111/load_and_zoom", loadAndZoomParams);
@@ -182,5 +179,4 @@ PluginsAPI.Map.addActionButton(function (options) {
         )
       )
     );
-  }
 });
