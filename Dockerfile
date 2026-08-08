@@ -164,7 +164,7 @@ RUN <<EOT
     mkdir -p /var/spool/cron/crontabs
     ln -sf $WORKDIR/nginx/crontab /var/spool/cron/crontabs/root
 
-    mkdir -p /external/NodeODM
+    mkdir -p external/NodeODM
 
     # NodeODM setup
     chmod +x ./nginx/letsencrypt-autogen.sh
