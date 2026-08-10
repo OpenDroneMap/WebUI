@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 import struct
+import zlib
 import tempfile
 from datetime import datetime
 import uuid as uuid_module
@@ -11,9 +12,10 @@ from zipstream.ng import ZipStream
 import json
 import redis
 from shlex import quote
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 import errno
-import piexif
 import re
 
 import zipfile
@@ -22,10 +24,8 @@ from shutil import copyfile
 import requests
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = 4096000000
-from django.contrib.gis.gdal import GDALRaster
-from django.contrib.gis.gdal import OGRGeometry
 from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.postgres import fields
+from django.contrib.postgres import fields as postgres_fields
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.exceptions import ValidationError, SuspiciousFileOperation
 from django.db import models
@@ -37,11 +37,14 @@ from urllib3.exceptions import ReadTimeoutError
 from app import pending_actions
 from django.contrib.gis.db.models.fields import GeometryField
 
+from app.net import patch_dns_resolution, is_dns_resolution_problem
 from app.cogeo import assure_cogeo
 from app.pointcloud_utils import is_pointcloud_georeferenced
 from app.testwatch import testWatch
 from app.security import path_traversal_check
-from app.geoutils import geom_transform
+from app.geoutils import geom_transform, epsg_from_wkt, get_raster_bounds_wkt, get_srs_name_units_from_epsg_or_wkt
+from app.imageutils import extract_gps_from_image, is_panorama
+from app.video import extract_subtitles, srt_file_for_video, extract_gps_from_srt, VIDEO_EXTENSIONS as VIDEO_MOD_EXTENSIONS
 from nodeodm import status_codes
 from nodeodm.models import ProcessingNode
 from pyodm.exceptions import NodeResponseError, NodeConnectionError, NodeServerError, OdmError
@@ -50,8 +53,10 @@ from app.classes.gcp import GCPFile
 from .project import Project
 from django.utils.translation import gettext_lazy as _, gettext
 
+
 from functools import partial
 import subprocess
+import glob
 from app.classes.console import Console
 
 logger = logging.getLogger('app.logger')
@@ -100,72 +105,62 @@ def resize_image(image_path, resize_to, done=None):
     :param done: optional callback
     :return: path and resize ratio
     """
+    is_jpeg = re.match(r'.*\.jpe?g$', image_path, re.IGNORECASE)
+    path, ext = os.path.splitext(image_path)
+    resized_image_path = os.path.join(path + '.resized' + ext)
+    exiftool = None
+
     try:
-        can_resize = False
+        with Image.open(image_path) as im:
+            width, height = im.size
+            max_side = max(width, height)
+            if max_side < resize_to:
+                logger.warning('You asked to make {} bigger ({} --> {}), but we are not going to do that.'.format(image_path, max_side, resize_to))
+                retval = {'path': image_path, 'resize_ratio': 1}
+                if done is not None:
+                    done(retval)
+                return retval
 
-        # Check if this image can be resized
-        # There's no easy way to resize multispectral 16bit images
-        # (Support should be added to PIL)
-        is_jpeg = re.match(r'.*\.jpe?g$', image_path, re.IGNORECASE)
+            ratio = float(resize_to) / float(max_side)
+            resized_width = int(width * ratio)
+            resized_height = int(height * ratio)
+            xmp = im.info.get("xmp")
+            exif = im.info.get("exif")
 
-        if is_jpeg:
-            # We can always resize these
-            can_resize = True
-        else:
-            try:
-                bps = piexif.load(image_path)['0th'][piexif.ImageIFD.BitsPerSample]
-                if isinstance(bps, int):
-                    # Always resize single band images
-                    can_resize = True
-                elif isinstance(bps, tuple) and len(bps) > 1:
-                    # Only resize multiband images if depth is 8bit
-                    can_resize = bps == (8, ) * len(bps)
-                else:
-                    logger.warning("Cannot determine if image %s can be resized, hoping for the best!" % image_path)
-                    can_resize = True
-            except KeyError:
-                logger.warning("Cannot find BitsPerSample tag for %s" % image_path)
+            resized = im.resize((resized_width, resized_height), Image.LANCZOS)
+            params = {}
+            if is_jpeg:
+                params['quality'] = 100
+            
+            if is_jpeg:
+                if exif is not None:
+                    params['exif'] = exif
+                if xmp is not None:
+                    params['xmp'] = xmp
+            else:
+                # For TIFFs, we need to use exiftool
+                exiftool = shutil.which('exiftool')
+                if not exiftool:
+                    raise Exception("Exiftool missing, but needed")
 
-        if not can_resize:
-            logger.warning("Cannot resize %s" % image_path)
-            return {'path': image_path, 'resize_ratio': 1}
+            resized.save(resized_image_path, **params)
 
-        im = Image.open(image_path)
-        path, ext = os.path.splitext(image_path)
-        resized_image_path = os.path.join(path + '.resized' + ext)
-
-        width, height = im.size
-        max_side = max(width, height)
-        if max_side < resize_to:
-            logger.warning('You asked to make {} bigger ({} --> {}), but we are not going to do that.'.format(image_path, max_side, resize_to))
-            im.close()
-            return {'path': image_path, 'resize_ratio': 1}
-
-        ratio = float(resize_to) / float(max_side)
-        resized_width = int(width * ratio)
-        resized_height = int(height * ratio)
-
-        im = im.resize((resized_width, resized_height), Image.LANCZOS)
-        params = {}
-        if is_jpeg:
-            params['quality'] = 100
-
-        if 'exif' in im.info:
-            exif_dict = piexif.load(im.info['exif'])
-            #exif_dict['Exif'][piexif.ExifIFD.PixelXDimension] = resized_width
-            #exif_dict['Exif'][piexif.ExifIFD.PixelYDimension] = resized_height
-            im.save(resized_image_path, exif=piexif.dump(exif_dict), **params)
-        else:
-            im.save(resized_image_path, **params)
-
-        im.close()
+            if exiftool:
+                subprocess.run([exiftool, '-tagsfromfile', image_path, '-all', '-unsafe', resized_image_path, '-overwrite_original_in_place'], 
+                               check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run([exiftool, '-tagsfromfile', image_path, '-xmp', resized_image_path, '-overwrite_original_in_place'], 
+                               check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # Delete original image, rename resized image to original
         os.remove(image_path)
         os.rename(resized_image_path, image_path)
-
-    except (IOError, ValueError, struct.error, Image.DecompressionBombError) as e:
+    except Exception as e:
         logger.warning("Cannot resize {}: {}.".format(image_path, str(e)))
+        
+        # Cleanup
+        if os.path.isfile(resized_image_path):
+            os.remove(resized_image_path)
+        
         if done is not None:
             done()
         return None
@@ -255,8 +250,8 @@ class Task(models.Model):
     auto_processing_node = models.BooleanField(default=True, help_text=_("A flag indicating whether this task should be automatically assigned a processing node"), verbose_name=_("Auto Processing Node"))
     status = models.IntegerField(choices=STATUS_CODES, db_index=True, null=True, blank=True, help_text=_("Current status of the task"), verbose_name=_("Status"))
     last_error = models.TextField(null=True, blank=True, help_text=_("The last processing error received"), verbose_name=_("Last Error"))
-    options = fields.JSONField(default=dict, blank=True, help_text=_("Options that are being used to process this task"), validators=[validate_task_options], verbose_name=_("Options"))
-    available_assets = fields.ArrayField(models.CharField(max_length=80), default=list, blank=True, help_text=_("List of available assets to download"), verbose_name=_("Available Assets"))
+    options = models.JSONField(default=dict, blank=True, help_text=_("Options that are being used to process this task"), validators=[validate_task_options], verbose_name=_("Options"))
+    available_assets = postgres_fields.ArrayField(models.CharField(max_length=80), default=list, blank=True, help_text=_("List of available assets to download"), verbose_name=_("Available Assets"))
 
     orthophoto_extent = GeometryField(null=True, blank=True, srid=4326, help_text=_("Extent of the orthophoto"), verbose_name=_("Orthophoto Extent"))
     dsm_extent = GeometryField(null=True, blank=True, srid=4326, help_text=_("Extent of the DSM"), verbose_name=_("DSM Extent"))
@@ -286,13 +281,15 @@ class Task(models.Model):
     import_url = models.TextField(null=False, default="", blank=True, help_text=_("URL this task is imported from (only for imported tasks)"), verbose_name=_("Import URL"))
     images_count = models.IntegerField(null=False, blank=True, default=0, help_text=_("Number of images associated with this task"), verbose_name=_("Images Count"))
     partial = models.BooleanField(default=False, help_text=_("A flag indicating whether this task is currently waiting for information or files to be uploaded before being considered for processing."), verbose_name=_("Partial"))
-    potree_scene = fields.JSONField(default=dict, blank=True, help_text=_("Serialized potree scene information used to save/load measurements and camera view angle"), verbose_name=_("Potree Scene"))
+    potree_scene = models.JSONField(default=dict, blank=True, help_text=_("Serialized potree scene information used to save/load measurements and camera view angle"), verbose_name=_("Potree Scene"))
     epsg = models.IntegerField(null=True, default=None, blank=True, help_text=_("EPSG code of the dataset (if georeferenced)"), verbose_name="EPSG")
+    wkt = models.TextField(null=True, default=None, blank=True, help_text=_("WKT definition of the dataset (if georeferenced and EPSG code is not available)"), verbose_name="WKT")
     tags = models.TextField(db_index=True, default="", blank=True, help_text=_("Task tags"), verbose_name=_("Tags"))
-    orthophoto_bands = fields.JSONField(default=list, blank=True, help_text=_("List of orthophoto bands"), verbose_name=_("Orthophoto Bands"))
+    orthophoto_bands = models.JSONField(default=list, blank=True, help_text=_("List of orthophoto bands"), verbose_name=_("Orthophoto Bands"))
     size = models.FloatField(default=0.0, blank=True, help_text=_("Size of the task on disk in megabytes"), verbose_name=_("Size"))
     compacted = models.BooleanField(default=False, help_text=_("A flag indicating whether this task was compacted"), verbose_name=_("Compact"))
     crop = GeometryField(null=True, blank=True, srid=4326, help_text=_("Polygon defining the crop area of this task"), verbose_name=_("Crop Polygon"))
+    media = models.JSONField(default=list, blank=True, help_text=_("List of media files associated with this task"), verbose_name=_("Media"))
 
     
     class Meta:
@@ -385,7 +382,7 @@ class Task(models.Model):
         elif self.dsm_extent is not None:
             return self.dsm_extent.extent
         elif self.dtm_extent is not None:
-            return self.dsm_extent.extent
+            return self.dtm_extent.extent
         else:
             return None
 
@@ -394,6 +391,12 @@ class Task(models.Model):
         Get a path relative to the place where assets are stored
         """
         return self.task_path("assets", *args)
+
+    def media_directory_path(self, *args):
+        """
+        Get a path relative to the media directory for this task
+        """
+        return self.assets_path("media", *args)
 
     def data_path(self, *args):
         """
@@ -612,7 +615,10 @@ class Task(models.Model):
         # Import assets file from mounted system volume (media-dir)/imports by relative path.
         # Import file from relative path.
         if self.import_url and not os.path.exists(zip_path):
-            if self.import_url.startswith("file://"):
+            if self.import_url == "file://external":
+                # External asset import, files should already be in place
+                pass 
+            elif self.import_url.startswith("file://"):
                 imports_folder_path = os.path.join(settings.MEDIA_ROOT, "imports")
                 unsafe_path_to_import_file = os.path.join(settings.MEDIA_ROOT, "imports", self.import_url.replace("file://", ""))
                 # check is file placed in shared media folder in /imports directory without traversing
@@ -729,6 +735,7 @@ class Task(models.Model):
             if self.processing_node:
                 # Need to process some images (UUID not yet set and task doesn't have pending actions)?
                 if not self.uuid and self.pending_action is None and self.status is None:
+                    
                     logger.info("Processing... {}".format(self))
 
                     images_path = self.task_path()
@@ -918,7 +925,7 @@ class Task(models.Model):
                                 logger.info("Downloading all.zip for {}".format(self))
 
                                 # Download all assets
-                                zip_path = self.processing_node.download_task_assets(self.uuid, assets_dir, progress_callback=callback, parallel_downloads=max(1, int(16 / (2 ** retry_num))))
+                                zip_path = self.processing_node.download_task_assets(self.uuid, assets_dir, progress_callback=callback, parallel_downloads=max(1, int(settings.NODE_CONNECTIONS / (2 ** retry_num))))
 
                                 # Rename to all.zip
                                 all_zip_path = self.assets_path("all.zip")
@@ -949,7 +956,17 @@ class Task(models.Model):
                         self.save()
 
         except (NodeServerError, NodeResponseError) as e:
-            self.set_failure(str(e))
+            if is_dns_resolution_problem(e):
+                logger.warning("{} DNS resolution failed with {}".format(self, str(e)))
+                
+                if patch_dns_resolution():
+                    logger.warning("Patched the DNS resolution process")
+                else:
+                    # Pause before unlocking the task, this gives more time to the faulty DNS to recover
+                    logger.warning("Pausing for 30 seconds to give the DNS time to recover")
+                    time.sleep(30)
+            else:
+                self.set_failure(str(e))
         except NodeConnectionError as e:
             logger.warning("{} connection/timeout error: {}. We'll try reprocessing at the next tick.".format(self, str(e)))
         except TaskInterruptedException as e:
@@ -958,47 +975,56 @@ class Task(models.Model):
 
     def extract_assets_and_complete(self):
         """
-        Extracts assets/all.zip, populates task fields where required and assure COGs
-        It will raise a zipfile.BadZipFile exception is the archive is corrupted.
+        Extracts assets/all.zip (if available), populates task fields where required and assure COGs
+        It will raise a zipfile.BadZipFile exception if the archive is corrupted.
         :return:
         """
         assets_dir = self.assets_path("")
         zip_path = self.assets_path("all.zip")
+        is_backup = False
 
-        # Extract from zip
-        with zipfile.ZipFile(zip_path, "r") as zip_h:
-            zip_h.extractall(assets_dir)
-
-        logger.info("Extracted all.zip for {}".format(self))
-        
-        os.remove(zip_path)
-
-        # Check if this looks like a backup file, in which case we need to move the files
-        # a directory level higher
-        is_backup = os.path.isfile(self.assets_path("data", "backup.json")) and os.path.isdir(self.assets_path("assets"))
-        if is_backup:
-            logger.info("Restoring from backup")
+        if os.path.isfile(zip_path):
+            # Extract from zip
             try:
-                tmp_dir = os.path.join(settings.FILE_UPLOAD_TEMP_DIR, f"{self.id}.backup")
-                
-                shutil.move(assets_dir, tmp_dir)
-                shutil.rmtree(self.task_path(""))
-                shutil.move(tmp_dir, self.task_path(""))
-            except shutil.Error as e:
-                logger.warning("Cannot restore from backup: %s" % str(e))
-                raise NodeServerError("Cannot restore from backup")
-        else:
-            # Check if the zip file contained a top level directory
-            # which shouldn't be there and try to fix the structure
-            top_level = [os.path.join(assets_dir, d) for d in os.listdir(assets_dir)]
-            if len(top_level) == 1 and os.path.isdir(top_level[0]) and (not top_level[0].endswith("odm_orthophoto")):
-                second_level = [os.path.join(top_level[0], f) for f in os.listdir(top_level[0])]
-                if len(second_level) > 0:
-                    logger.info("Top level directory found in imported archive, attempting to fix")
-                    for f in second_level:
-                        shutil.move(f, assets_dir)
-                    shutil.rmtree(top_level[0])
+                with zipfile.ZipFile(zip_path, "r") as zip_h:
+                    zip_h.extractall(assets_dir)
+            except zlib.error as e:
+                raise zipfile.BadZipFile(str(e))
+            finally:
+                os.remove(zip_path)
+            
+            logger.info("Extracted all.zip for {}".format(self))
 
+            # Check if this looks like a backup file, in which case we need to move the files
+            # a directory level higher
+            is_backup = os.path.isfile(self.assets_path("data", "backup.json")) and os.path.isdir(self.assets_path("assets"))
+            if is_backup:
+                logger.info("Restoring from backup")
+                try:
+                    tmp_dir = os.path.join(settings.FILE_UPLOAD_TEMP_DIR, f"{self.id}.backup")
+                    
+                    shutil.move(assets_dir, tmp_dir)
+                    shutil.rmtree(self.task_path(""))
+                    shutil.move(tmp_dir, self.task_path(""))
+                except shutil.Error as e:
+                    logger.warning("Cannot restore from backup: %s" % str(e))
+                    raise NodeServerError("Cannot restore from backup")
+            else:
+                # Check if the zip file contained a top level directory
+                # which shouldn't be there and try to fix the structure
+                top_level = [os.path.join(assets_dir, d) for d in os.listdir(assets_dir)]
+                if len(top_level) == 1 and os.path.isdir(top_level[0]) and (not top_level[0].endswith("odm_orthophoto")):
+                    second_level = [os.path.join(top_level[0], f) for f in os.listdir(top_level[0])]
+                    if len(second_level) > 0:
+                        logger.info("Top level directory found in imported archive, attempting to fix")
+                        for f in second_level:
+                            shutil.move(f, assets_dir)
+                        shutil.rmtree(top_level[0])
+
+        elif self.import_url != "file://external":
+            # all.zip should be missing only when doing external data import
+            logger.warning("Cannot find assets archive for {} ({})".format(self, zip_path))
+            raise NodeServerError("Cannot import task")
 
         # Populate *_extent fields
         extent_fields = self.get_extent_fields()
@@ -1012,35 +1038,20 @@ class Task(models.Model):
                 except IOError as e:
                     logger.warning("Cannot create Cloud Optimized GeoTIFF for %s (%s). This will result in degraded visualization performance." % (raster_path, str(e)))
 
-                # Read extent and SRID
-                raster = GDALRaster(raster_path)
-                extent = OGRGeometry.from_bbox(raster.extent)
-
-                # Make sure PostGIS supports it
-                with connection.cursor() as cursor:
-                    cursor.execute("SELECT SRID FROM spatial_ref_sys WHERE SRID = %s", [raster.srid])
-                    if cursor.rowcount == 0:
-                        raise NodeServerError(gettext("Unsupported SRS %(code)s. Please make sure you picked a supported SRS.") % {'code': str(raster.srid)})
-
-                # It will be implicitly transformed into the SRID of the model’s field
-                # self.field = GEOSGeometry(...)
-                setattr(self, field, GEOSGeometry(extent.wkt, srid=raster.srid))
-
-                logger.info("Populated extent field with {} for {}".format(raster_path, self))
+                # Read extent
+                extent_wkt = get_raster_bounds_wkt(raster_path)
+                if extent_wkt is not None:
+                    extent = GEOSGeometry(extent_wkt, srid=4326)
+                    setattr(self, field, extent)
+                    logger.info("Populated extent field with {} for {}".format(raster_path, self))
+                else:
+                    logger.warning("Cannot populate extent field with {} for {}, not georeferenced".format(raster_path, self))
         
         self.check_ept()
-
-        # Flushes the changes to the *_extent fields
-        # and immediately reads them back into Python
-        # This is required because GEOS screws up the X/Y conversion
-        # from the raster CRS to 4326, whereas PostGIS seems to do it correctly :/
-        self.status = status_codes.RUNNING # avoid telling clients that task is completed prematurely
-        self.save()
-        self.refresh_from_db()
-
         self.update_available_assets_field()
-        self.update_epsg_field()
+        self.update_georef_fields()
         self.update_orthophoto_bands_field()
+        self.update_media_field()
         self.update_size()
         self.clear_task_assets_cache()
         self.potree_scene = {}
@@ -1118,9 +1129,10 @@ class Task(models.Model):
                 return file 
     
     def get_point_cloud(self):
-        f = os.path.realpath(self.assets_path(self.ASSETS_MAP["georeferenced_model.laz"]))
-        if os.path.isfile(f):
-            return f
+        for asset in ["georeferenced_model.laz", "georeferenced_model.las"]:
+            f = os.path.realpath(self.assets_path(self.ASSETS_MAP[asset]))
+            if os.path.isfile(f):
+                return f
 
     def get_tile_path(self, tile_type, z, x, y):
         return self.assets_path("{}_tiles".format(tile_type), z, x, "{}.png".format(y))
@@ -1146,6 +1158,10 @@ class Task(models.Model):
         ground_control_points = ''
         if 'ground_control_points.geojson' in self.available_assets: ground_control_points = '/api/projects/{}/tasks/{}/download/ground_control_points.geojson'.format(self.project.id, self.id)
 
+        media = ''
+        if isinstance(self.media, list) and len(self.media) > 0:
+             media = '/api/projects/{}/tasks/{}/media.geojson'.format(self.project.id, self.id)
+
         return {
             'tiles': [{'url': self.get_tile_base_url(t), 'type': t} for t in types],
             'meta': {
@@ -1158,18 +1174,21 @@ class Task(models.Model):
                     'camera_shots': camera_shots,
                     'ground_control_points': ground_control_points,
                     'epsg': self.epsg,
+                    'wkt': self.wkt,
+                    'srs': get_srs_name_units_from_epsg_or_wkt(self.epsg, self.wkt),
                     'orthophoto_bands': self.orthophoto_bands,
                     'crop': self.crop is not None,
                     'extent': self.get_extent(),
+                    'media': media
                 }
             }
         }
 
     def get_projected_crop(self):
-        if self.crop is None or self.epsg is None:
+        if self.crop is None or (self.epsg is None and self.wkt is None):
             return None
         
-        return geom_transform(self.crop, self.epsg)
+        return geom_transform(self.crop, self.epsg if self.epsg is not None else self.wkt)
 
     def get_model_display_params(self):
         """
@@ -1182,6 +1201,7 @@ class Task(models.Model):
             'public': self.public,
             'public_edit': self.public_edit,
             'epsg': self.epsg,
+            'srs': get_srs_name_units_from_epsg_or_wkt(self.epsg, self.wkt),
             'crop_projected': self.get_projected_crop() 
         }
 
@@ -1213,32 +1233,50 @@ class Task(models.Model):
         if commit: self.save()
 
     
-    def update_epsg_field(self, commit=False):
+    def update_georef_fields(self, commit=False):
         """
-        Updates the epsg field with the correct value
+        Updates the epsg and wkt field with the correct values
         :param commit: when True also saves the model, otherwise the user should manually call save()
         """
         epsg = None
+        wkt = None
+
         for asset in ['orthophoto.tif', 'dsm.tif', 'dtm.tif']:
             asset_path = self.assets_path(self.ASSETS_MAP[asset])
             if os.path.isfile(asset_path):
                 try:
                     with rasterio.open(asset_path) as f:
                         if f.crs is not None:
-                            epsg = f.crs.to_epsg()
-                            break # We assume all assets are in the same CRS
+                            code = f.crs.to_epsg()
+                            if code is not None:
+                                epsg = code
+                                break # We assume all assets are in the same CRS
+                            else:
+                                # Try to get code from WKT
+                                wkt = f.crs.to_wkt()
+                                if wkt is not None:
+                                    code = epsg_from_wkt(wkt)
+                                    if code is not None:
+                                        epsg = code
+                                        break
                 except Exception as e:
                     logger.warning(e)
 
         # If point cloud is not georeferenced, dataset is not georeferenced
         # (2D assets might be using pseudo-georeferencing)
         point_cloud = self.assets_path(self.ASSETS_MAP['georeferenced_model.laz'])
-        if epsg is not None and os.path.isfile(point_cloud):
+        if (epsg is not None or wkt is not None) and os.path.isfile(point_cloud):
             if not is_pointcloud_georeferenced(point_cloud):
                 logger.info("{} is not georeferenced".format(self))
                 epsg = None
+                wkt = None
 
         self.epsg = epsg
+        if epsg is None:
+            self.wkt = wkt
+        else:
+            self.wkt = None # Only save one or the other
+
         if commit: self.save()
 
 
@@ -1261,6 +1299,94 @@ class Task(models.Model):
 
         self.orthophoto_bands = bands
         if commit: self.save()
+
+    PHOTO_EXTENSIONS = {'.jpg', '.jpeg', '.png'}
+    VIDEO_EXTENSIONS = VIDEO_MOD_EXTENSIONS
+    MEDIA_EXTENSIONS = PHOTO_EXTENSIONS | VIDEO_EXTENSIONS | {'.srt'}
+    MEDIA_TYPE_ORDER = {'photo': 0, 'pano': 1, 'video': 2}
+
+    @staticmethod
+    def get_media_type(filepath):
+        ext = os.path.splitext(filepath)[1].lower()
+        if ext in Task.VIDEO_EXTENSIONS:
+            return 'video'
+        if ext in Task.PHOTO_EXTENSIONS:
+            if is_panorama(filepath):
+                return 'pano'
+            return 'photo'
+        return None
+
+    def build_media_entry(self, filepath):
+        filename = os.path.basename(filepath)
+        media_type = self.get_media_type(filepath)
+        if media_type is None:
+            return None
+
+        size = os.path.getsize(filepath)
+        geolocation = None
+
+        existing = None
+        if self.media:
+            for entry in self.media:
+                if entry.get('filename') == filename:
+                    existing = entry
+                    break   
+
+        entry = {
+            'type': media_type,
+            'filename': filename,
+            'description': existing.get('description', '') if existing else '',
+            'size': size,
+        }
+
+        if media_type in ['photo', 'pano']:
+            geolocation = extract_gps_from_image(filepath)
+            if media_type == 'pano':
+                try:
+                    with Image.open(filepath) as im:
+                        entry['width'] = im.size[0]
+                        entry['height'] = im.size[1]
+                except Exception:
+                    pass
+
+        elif media_type == 'video':
+            # Try to extract SRT, parse geolocation at t = 0
+            if extract_subtitles(filepath):
+                srt_file = srt_file_for_video(filepath)
+                geolocation = extract_gps_from_srt(srt_file)
+                entry['srt'] = True
+        
+        entry['geolocation'] = geolocation
+        
+        return entry
+
+    def update_media_field(self, commit=False):
+        media_dir = self.media_directory_path()
+        if not os.path.isdir(media_dir):
+            if self.media:
+                self.media = []
+                if commit:
+                    self.save()
+            return
+
+        entries = []
+        for f in os.listdir(media_dir):
+            fp = os.path.join(media_dir, f)
+            if not os.path.isfile(fp):
+                continue
+            entry = self.build_media_entry(fp)
+            if entry is not None:
+                entries.append(entry)
+
+        entries.sort(key=lambda e: (self.MEDIA_TYPE_ORDER.get(e['type'], 99), e['filename'].lower()))
+        self.media = entries
+        if commit:
+            self.save()
+    
+    def get_media_entry(self, filename):
+        for entry in self.media:
+            if entry.get('filename') == filename:
+                return entry
 
     def delete(self, using=None, keep_parents=False):
         task_id = self.id
@@ -1337,12 +1463,14 @@ class Task(models.Model):
             return []
         # Add a signal to notify that we are resizing images
         from app.plugins import signals as plugin_signals
+
         plugin_signals.task_resizing_images.send_robust(sender=self.__class__, task_id=self.id)
 
-        images_path = self.find_all_files_matching(r'.*\.(jpe?g|tiff?)$')
+        images_path = self.find_all_files_matching(r'.*\.(jpe?g|tiff?|png)$')
         total_images = len(images_path)
         resized_images_count = 0
         last_update = 0
+        lock = threading.Lock()
 
         def callback(retval=None):
             nonlocal last_update
@@ -1351,13 +1479,32 @@ class Task(models.Model):
 
             resized_images_count += 1
             if time.time() - last_update >= 2:
-                # Update progress
-                Task.objects.filter(pk=self.id).update(resize_progress=(float(resized_images_count) / float(total_images)))
-                self.check_if_canceled()
-                last_update = time.time()
+                with lock:
+                    if settings.TESTING:
+                        # In testing, django is unable to find the Task object, so we skip this
+                        return
+                    
+                    # Update progress
+                    Task.objects.filter(pk=self.id).update(resize_progress=(float(resized_images_count) / float(total_images)))
+                    self.check_if_canceled()
+                    last_update = time.time()
 
-        resized_images = [im for im in list(map(partial(resize_image, resize_to=self.resize_to, done=callback), images_path)) 
-                          if im is not None]
+        max_workers = max(1, min(settings.WORKERS_MAX_THREADS, len(images_path)))
+        
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = []
+            for image_path in images_path:
+                f = executor.submit(resize_image, image_path, self.resize_to, callback)
+                futures.append(f)
+            
+            resized_images = []
+            for f in futures:
+                try:
+                    resized_images.append(f.result())
+                except Exception as e:
+                    logger.warning(f"Error resizing image: {str(e)}")
+        
+        resized_images = [im for im in resized_images if im is not None]
         
         Task.objects.filter(pk=self.id).update(resize_progress=1.0)
 

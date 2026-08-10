@@ -1,0 +1,111 @@
+.toaster-ripple-overlay {
+    position: fixed;
+    z-index: 1000;
+    border-width: 2px;
+    border-style: solid; 
+    pointer-events: none;
+    border-radius: 4px;
+}
+
+@keyframes toaster-share-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+#global-toaster{
+    z-index: 3;
+    width: 300px;
+    position: fixed;    
+    bottom: 0px;
+    right: 31px;
+    border-width: 1px 1px 0px 1px;
+    border-style: solid;
+    border-radius: 4px 4px 0 0;
+    &:hover{
+        cursor: pointer;
+    }
+    .toaster-header{
+        border-radius: 4px 4px 0 0;
+        display: flex;
+        padding: 3px 6px 3px 6px;
+
+        .toaster-title{
+            font-weight: 500;
+        }
+
+        .toaster-controls{
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: auto;
+        }
+    }
+
+    .toaster-body{
+        max-height: 240px;
+        overflow-y: auto;
+        display: none;
+        &.expanded{
+            display: block;
+        }
+    }
+
+    .toaster-task{
+        padding: 4px 8px 4px 8px;
+        min-height: 32px;
+        border-top-width: 1px;
+        border-top-style: solid;
+        display: flex;
+        justify-content: space-between;
+        font-size: 90%;
+
+        .toaster-btn{
+            width: 22px;
+            height: 22px;
+        }
+        
+        .toaster-btn-close{
+            visibility: hidden;
+        }
+
+        &:hover{
+            .toaster-btn-close{
+                visibility: visible;
+            }
+        }
+
+        .toaster-task-label{
+            display: flex;
+            align-items: center;
+            i{ margin-right: 6px; font-size: 15px; }
+
+            .toaster-share-pulse{
+                animation: toaster-share-pulse 1.5s ease-in-out infinite;
+            }
+            .toaster-task-label-text{
+                max-width: 240px;
+                text-overflow: ellipsis;
+                overflow-x: hidden;
+                white-space: nowrap;
+            }
+        }
+    }
+
+     .toaster-btn{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border: none;
+        border-radius: 50%;
+        color: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 12px;
+
+        i{
+            margin: 0;
+        }
+    }
+}

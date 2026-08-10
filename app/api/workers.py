@@ -23,23 +23,29 @@ class CheckTask(APIView):
             if res.state == "PROGRESS" and res.info is not None:
                 for k in res.info:
                     out[k] = res.info[k]
+
+            if res.state == "ABORTED":
+                out['canceled'] = True
             
             return Response(out, status=status.HTTP_200_OK)
         else:
-            result = res.get()
+            try:
+                result = res.get()
 
-            if result.get('error', None) is not None:
-                msg = self.on_error(result)
-                return Response({'ready': True, 'error': msg})
+                if result.get('error', None) is not None:
+                    msg = self.on_error(result)
+                    return Response({'ready': True, 'error': msg})
 
-            if self.error_check(result) is not None:
-                msg = self.on_error(result)
-                return Response({'ready': True, 'error': msg})
+                if self.error_check(result) is not None:
+                    msg = self.on_error(result)
+                    return Response({'ready': True, 'error': msg})
 
-            if isinstance(result.get('file'), str) and not os.path.isfile(result.get('file')):
-                return Response({'ready': True, 'error': "Cannot generate file"})
+                if isinstance(result.get('file'), str) and not os.path.isfile(result.get('file')):
+                    return Response({'ready': True, 'error': "Cannot generate file"})
 
-            return Response({'ready': True})
+                return Response({'ready': True})
+            except Exception as e:
+                return Response({'ready': True, 'error': str(e)})
 
     def on_error(self, result):
         return result['error']
@@ -59,6 +65,7 @@ class GetTaskResult(APIView):
             result = res.get()
             file = result.get('file', None) # File path
             output = result.get('output', None) # String/object
+            link = result.get('link', None)
         else:
             return Response({'error': 'Task not ready'})
 
@@ -89,8 +96,22 @@ class GetTaskResult(APIView):
                 return Response({'error': str(e)})
 
             return Response({'output': output})
+        elif link is not None:
+            return Response({'link': link})
         else:
             return Response({'error': 'Invalid task output (cannot find valid key)'})
 
     def handle_output(self, output, result, **kwargs):
         return output
+
+
+class CancelTask(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, celery_task_id=None, **kwargs):
+        res = TestSafeAsyncResult(celery_task_id)
+
+        if not res.ready():
+            res.backend.store_result(celery_task_id, result=None, state="ABORTED", traceback=None)
+
+        return Response({'success': True})

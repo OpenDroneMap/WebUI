@@ -61,12 +61,25 @@ class TestApiTask(BootTransactionTestCase):
             pnode = ProcessingNode.objects.create(hostname="localhost", port=11223)
             assign_perm('view_processingnode', user, pnode)
             assign_perm('view_processingnode', other_user, pnode)
+
+            other_pnode = ProcessingNode.objects.create(hostname="localhost", port=11224)
+            assign_perm('view_processingnode', other_user, other_pnode)
             
             # task creation via file upload
             image1 = open("app/fixtures/tiny_drone_image.jpg", 'rb')
             image2 = open("app/fixtures/tiny_drone_image_2.jpg", 'rb')
 
             client.login(username="testuser", password="test1234")
+
+            # Attempt to create a task with a processing node we have no access to
+            res = client.post("/api/projects/{}/tasks/".format(project.id), {
+                'images': [image1, image2],
+                'name': 'test task',
+                'processing_node': other_pnode.id
+            }, format="multipart")
+            self.assertTrue(res.status_code == status.HTTP_400_BAD_REQUEST)
+            image1.seek(0)
+            image2.seek(0)
 
             # Normal case with images[], name and processing node parameter
             res = client.post("/api/projects/{}/tasks/".format(project.id), {
@@ -80,6 +93,7 @@ class TestApiTask(BootTransactionTestCase):
 
             # Should have returned the id of the newly created task
             task = Task.objects.latest('created_at')
+            test_proj = "+proj=tmerc +lat_0=39.75527777777778 +lon_0=-104.8980555555556 +k=1.00025403 +x_0=182880.3657607315 +y_0=121920.2438404877 +ellps=GRS80 +units=us-ft +no_defs326"
 
             params = [
                 ('orthophoto', {'formula': 'NDVI', 'bands': 'RGN'}, status.HTTP_200_OK),
@@ -95,11 +109,17 @@ class TestApiTask(BootTransactionTestCase):
                 res = client.post("/api/projects/{}/tasks/{}/{}/export".format(project.id, task.id, asset_type), data)
                 self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
+            # Assign invalid processing node to task via API
+            res = client.patch("/api/projects/{}/tasks/{}/".format(project.id, task.id), {
+                'processing_node': other_pnode.id
+            })
+            self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
             # Assign processing node to task via API
             res = client.patch("/api/projects/{}/tasks/{}/".format(project.id, task.id), {
                 'processing_node': pnode.id
             })
-            self.assertTrue(res.status_code == status.HTTP_200_OK)
+            self.assertEqual(res.status_code, status.HTTP_200_OK)
 
             retry_count = 0
             while task.status != status_codes.COMPLETED:
@@ -128,6 +148,7 @@ class TestApiTask(BootTransactionTestCase):
                 ('orthophoto', {'format': 'gtiff-rgb', 'rescale': "10,100"}, False, ".tif", status.HTTP_200_OK),
                 ('orthophoto', {'format': 'laz'}, False, ".tif", status.HTTP_400_BAD_REQUEST),
                 ('orthophoto', {'format': 'jpg', 'epsg': 4326}, False, ".jpg", status.HTTP_200_OK),
+                ('orthophoto', {'format': 'jpg', 'proj': test_proj}, False, ".jpg", status.HTTP_200_OK),
                 ('orthophoto', {'format': 'jpg', 'epsg': 4326, 'rescale': '10,200'}, False, ".jpg", status.HTTP_200_OK),
                 ('orthophoto', {'format': 'png'}, False, ".png", status.HTTP_200_OK),
                 ('orthophoto', {'format': 'kmz'}, False, ".kmz", status.HTTP_200_OK),
@@ -139,6 +160,7 @@ class TestApiTask(BootTransactionTestCase):
                 ('dsm', {'format': 'gtiff'}, True, ".tif", status.HTTP_200_OK),
                 ('dsm', {'epsg': 4326}, False, ".tif", status.HTTP_200_OK),
                 ('dsm', {'format': 'jpg', 'epsg': 4326}, False, ".jpg", status.HTTP_200_OK),
+                ('dsm', {'format': 'jpg', 'proj': test_proj}, False, ".jpg", status.HTTP_200_OK),
                 ('dsm', {'format': 'jpg', 'color_map': 'jet', 'hillshade': 0, 'epsg': 3857}, False, ".jpg", status.HTTP_200_OK),
                 ('dsm', {'epsg': 4326, 'format': 'jpg'}, False, ".jpg", status.HTTP_200_OK),
                 ('dsm', {'epsg': 4326, 'format': 'gtiff-rgb'}, False, ".tif", status.HTTP_200_OK),
@@ -155,12 +177,14 @@ class TestApiTask(BootTransactionTestCase):
                 
                 ('dtm', {'format': 'gtiff'}, True, ".tif", status.HTTP_200_OK),
                 ('dtm', {'epsg': 4326}, False, ".tif", status.HTTP_200_OK),
+                ('dtm', {'proj': test_proj}, False, ".tif", status.HTTP_200_OK),
 
                 ('georeferenced_model', {}, True, ".laz", status.HTTP_200_OK),
                 ('georeferenced_model', {'format': 'las'}, False, ".las", status.HTTP_200_OK),
                 ('georeferenced_model', {'format': 'ply'}, False, ".ply", status.HTTP_200_OK),
                 ('georeferenced_model', {'format': 'csv'}, False, ".csv", status.HTTP_200_OK),
                 ('georeferenced_model', {'format': 'las', 'epsg': 4326}, False, ".las", status.HTTP_200_OK),
+                ('georeferenced_model', {'format': 'las', 'proj': test_proj}, False, ".las", status.HTTP_200_OK),
 
                 ('georeferenced_model', {'format': 'tif'}, False, ".laz", status.HTTP_400_BAD_REQUEST),
             ]

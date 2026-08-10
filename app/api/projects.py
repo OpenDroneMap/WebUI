@@ -1,12 +1,18 @@
 import re
-from guardian.shortcuts import get_perms, get_users_with_perms, assign_perm, remove_perm
+from guardian.shortcuts import (
+    get_perms,
+    get_users_with_perms,
+    get_groups_with_perms,
+    assign_perm,
+    remove_perm,
+)
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from django_filters import rest_framework as filters
 from django.db import transaction
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.postgres.search import SearchQuery, SearchVector
 from django.contrib.postgres.aggregates import StringAgg
 from django.db.models import Q
@@ -53,9 +59,9 @@ class ProjectFilter(filters.FilterSet):
 
     def filter_search(self, qs, name, value):
         value = value.replace(":", "#")
-        tag_pattern = re.compile("#[^\s]+")
+        tag_pattern = re.compile(r"#[^\s]+")
         tags = set(re.findall(tag_pattern, value))
-        user_pattern = re.compile("@[^\s]+")
+        user_pattern = re.compile(r"@[^\s]+")
         users = list(set(re.findall(user_pattern, value)))
 
         task_tags = set([t for t in tags if t.startswith("##")])
@@ -64,7 +70,7 @@ class ProjectFilter(filters.FilterSet):
         task_tags = [t.replace("##", "") for t in task_tags]
         project_tags = [t.replace("#", "") for t in project_tags]
 
-        names = re.sub("\s+", " ", re.sub(user_pattern, "", re.sub(tag_pattern, "", value))).strip()
+        names = re.sub(r"\s+", " ", re.sub(user_pattern, "", re.sub(tag_pattern, "", value))).strip()
 
         if len(users) > 0:
             qs = qs.filter(owner__username__iexact=users[0][1:])
@@ -97,13 +103,6 @@ class ProjectFilter(filters.FilterSet):
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    """
-    Project get/add/delete/update
-    Projects are the building blocks
-    of processing. Each project can have zero or more tasks associated with it.
-    Users can fine tune the permissions on projects, including whether users/groups have 
-    access to view, add, change or delete them.
-    """
     filter_fields = ('id', 'name', 'description', 'created_at')
     serializer_class = ProjectSerializer
     queryset = models.Project.objects.prefetch_related('task_set').filter(deleting=False).order_by('-created_at')
@@ -142,7 +141,15 @@ class ProjectViewSet(viewsets.ModelViewSet):
                            'permissions': normalized_perm_names(perms[user])})
         
         result.sort(key=lambda r: r['owner'], reverse=True)
-        return Response(result, status=status.HTTP_200_OK)
+
+        group_perms = get_groups_with_perms(project, attach_perms=True)
+        for group in group_perms:
+            result.append({'groupname': group.name,
+                           'permissions': normalized_perm_names(group_perms[group])})
+
+        response = Response(result, status=status.HTTP_200_OK)
+        response['X-Groups-Count'] = Group.objects.count()
+        return response
     
     @action(detail=True, methods=['post'])
     def edit(self, request, pk=None):
@@ -157,10 +164,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
                 form_perms = request.data.get('permissions')
                 if form_perms is not None:
-                    # Build perms map (ignore owners, empty usernames)
+                    # Build perms maps (ignore owners, empty usernames). If groupname is set, it takes precedence.
                     perms_map = {}
+                    group_perms_map = {}
                     for perm in form_perms:
-                        if not perm.get('owner') and perm.get('username'):
+                        if perm.get('groupname'):
+                            group_perms_map[perm['groupname']] = perm['permissions']
+                        elif not perm.get('owner') and perm.get('username'):
                             perms_map[perm['username']] = perm['permissions']
 
                     db_perms = get_users_with_perms(project, attach_perms=True, with_group_users=False)
@@ -178,9 +188,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
                     
                     # Check users to add/edit
                     for username in perms_map:
+                        user = User.objects.get(username=username)
                         for p in ["add", "change", "delete", "view"]:
                             perm = p + "_project"
-                            user = User.objects.get(username=username)
 
                             # Skip owners
                             if project.owner == user:
@@ -194,9 +204,28 @@ class ProjectViewSet(viewsets.ModelViewSet):
                             elif p in perms_map[username] and not user.has_perm(perm, project):
                                 assign_perm(perm, user, project)
 
-        except User.DoesNotExist as e:
+                    db_group_perms = get_groups_with_perms(project, attach_perms=True)
+
+                    for group in db_group_perms:
+                        if group_perms_map.get(group.name) is None:
+                            for p in db_group_perms[group]:
+                                remove_perm(p, group, project)
+
+                    for groupname in group_perms_map:
+                        group = Group.objects.get(name=groupname)
+                        for p in ["add", "change", "delete", "view"]:
+                            codename = p + "_project"
+                            gp = set(get_perms(group, project))
+                            if codename in gp and p not in group_perms_map[groupname]:
+                                remove_perm(codename, group, project)
+                            elif p in group_perms_map[groupname] and codename not in gp:
+                                assign_perm(codename, group, project)
+
+        except User.DoesNotExist:
             return Response({'error': _("Invalid user in permissions list")}, status=status.HTTP_400_BAD_REQUEST)
-        except AttributeError as e:
+        except Group.DoesNotExist:
+            return Response({'error': _("Invalid group in permissions list")}, status=status.HTTP_400_BAD_REQUEST)
+        except AttributeError:
             return Response({'error': _("Invalid permissions")}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'success': True}, status=status.HTTP_200_OK)
@@ -206,7 +235,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         # Owner? Delete the project
         if project.owner == request.user or request.user.is_superuser:
-            get_and_check_project(request, pk, ('delete_project', ))
+            get_and_check_project(request, pk, ('delete_project', ), defer=True)
 
             return super().destroy(self, request, pk=pk)
         else:

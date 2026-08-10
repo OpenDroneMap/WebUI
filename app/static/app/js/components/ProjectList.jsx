@@ -11,8 +11,13 @@ import PropTypes from 'prop-types';
 import Utils from '../classes/Utils';
 
 class ProjectList extends Paginated {
+    static defaultProps = {
+        basemaps: []
+    }
+
     static propTypes = {
         history: PropTypes.object.isRequired,
+        basemaps: PropTypes.array
     }
 
     constructor(props){
@@ -127,7 +132,8 @@ class ProjectList extends Paginated {
                                 onDelete={this.handleDelete}
                                 onTaskMoved={this.handleTaskMoved}
                                 onProjectDuplicated={this.handleProjectDuplicated}
-                                history={this.props.history} /> 
+                                history={this.props.history}
+                                basemaps={this.props.basemaps} /> 
                         ))}
                     </ul>
                 </Paginator>

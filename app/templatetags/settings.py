@@ -5,6 +5,7 @@ import time
 from django import template
 from webodm import settings
 from django.utils.translation import gettext as _
+from app.oidc_providers import get_oidc_providers
 
 register = template.Library()
 logger = logging.getLogger('app.logger')
@@ -15,7 +16,7 @@ def task_options_docs_link():
 
 @register.simple_tag
 def gcp_docs_link():
-    return '<a href="%s" target="_blank">' % settings.GCP_DOCS_LINK
+    return settings.GCP_DOCS_LINK
 
 @register.simple_tag
 def reset_password_link():
@@ -24,6 +25,14 @@ def reset_password_link():
 @register.simple_tag
 def has_external_auth():
     return settings.EXTERNAL_AUTH_ENDPOINT != ""
+
+@register.simple_tag
+def has_oidc_auth():
+    return len(get_oidc_providers()) > 0
+
+@register.simple_tag
+def oidc_auth_providers():
+    return get_oidc_providers()
 
 @register.filter
 def disk_size(megabytes):
@@ -84,7 +93,8 @@ def settings_image_url(context, image):
         return ''
 
     try:
-        return "/media/" + img_cache.url
+        # img_cache.url already includes MEDIA_URL prefix, don't prepend it again
+        return img_cache.url
     except FileNotFoundError:
         logger.warning("Cannot get %s, this could mean the image was deleted." % image)
         return ''

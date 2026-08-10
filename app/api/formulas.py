@@ -152,6 +152,8 @@ camera_filters = [
     'BGRNReL',
     'BGRReNL',
 
+    'BGRNReP',
+    'RGBNReP',
     'RGBNRePL',
 
     'L', # FLIR camera has a single LWIR band
@@ -179,7 +181,7 @@ def lookup_formula(algo, band_order = 'RGB'):
         except ValueError:
             raise ValueError("Cannot find band \"" + b + "\" from \"" + band_order + "\". Choose a proper band order.")
 
-    expr = re.sub("([A-Z]+?[a-z]*)", repl, re.sub("\s+", "", algos[algo]['expr']))
+    expr = re.sub("([A-Z]+?[a-z]*)", repl, re.sub(r"\s+", "", algos[algo]['expr']))
     hrange = algos[algo].get('range', None)
 
     return expr, hrange
@@ -249,7 +251,7 @@ def get_auto_bands(orthophoto_bands, formula):
     max_bands = len(orthophoto_bands) - 1 # minus alpha
     filters = get_camera_filters_for(algo['expr'], max_bands)
     if not filters:
-        raise valueError(f"Cannot find filters for {algo} with max bands {max_bands}")
+        raise ValueError(f"Cannot find filters for {algo} with max bands {max_bands}")
 
     bands_lookup = get_bands_lookup()
     band_order = ""

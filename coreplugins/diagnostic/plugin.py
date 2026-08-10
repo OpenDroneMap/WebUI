@@ -4,13 +4,43 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 
 import json, shutil
+import ctypes
+import sys
 
 def get_memory_stats():
     """
-    Get node total memory and memory usage (Linux only)
-    https://stackoverflow.com/questions/17718449/determine-free-ram-in-python
+    Get node total memory and memory usage.
     """
     try:
+        if sys.platform == 'win32':
+            class MEMORYSTATUSEX(ctypes.Structure):
+                _fields_ = [
+                    ('dwLength', ctypes.c_ulong),
+                    ('dwMemoryLoad', ctypes.c_ulong),
+                    ('ullTotalPhys', ctypes.c_ulonglong),
+                    ('ullAvailPhys', ctypes.c_ulonglong),
+                    ('ullTotalPageFile', ctypes.c_ulonglong),
+                    ('ullAvailPageFile', ctypes.c_ulonglong),
+                    ('ullTotalVirtual', ctypes.c_ulonglong),
+                    ('ullAvailVirtual', ctypes.c_ulonglong),
+                    ('ullAvailExtendedVirtual', ctypes.c_ulonglong),
+                ]
+
+            mem_status = MEMORYSTATUSEX()
+            mem_status.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
+
+            if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(mem_status)):
+                return {}
+
+            total = int(mem_status.ullTotalPhys)
+            free = int(mem_status.ullAvailPhys)
+
+            return {
+                'total': total,
+                'free': free,
+                'used': total - free,
+            }
+
         with open('/proc/meminfo', 'r') as mem:
             ret = {}
             tmp = 0
@@ -48,7 +78,7 @@ class Plugin(PluginBase):
                 'free_disk_space': free_disk_space
             }
 
-            # Memory (Linux only)
+            # Memory
             memory_stats = get_memory_stats()
             if 'free' in memory_stats:
                 template_args['free_memory'] = memory_stats['free']

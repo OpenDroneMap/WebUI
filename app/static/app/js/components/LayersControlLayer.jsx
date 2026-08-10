@@ -7,6 +7,7 @@ import Utils from '../classes/Utils';
 import Workers from '../classes/Workers';
 import ErrorMessage from './ErrorMessage';
 import ExportAssetPanel from './ExportAssetPanel';
+import ColorMaps from '../classes/ColorMaps';
 import PluginsAPI from '../classes/plugins/API';
 import $ from 'jquery';
 import { _, interpolate } from '../classes/gettext';
@@ -67,7 +68,8 @@ export default class LayersControlLayer extends React.Component {
         histogramLoading: false,
         exportLoading: false,
         side: false,
-        error: ""
+        error: "",
+        lazyLoading: false,
     };
     this.rescale = params.rescale || "";
   }
@@ -127,6 +129,14 @@ export default class LayersControlLayer extends React.Component {
 
     if (prevState.visible !== this.state.visible){
         if (this.state.visible){
+            if (layer.lazyLoad && !layer.lazyLoaded && !this.state.lazyLoading){
+                this.setState({lazyLoading: true});
+                layer.lazyLoad((err) => {
+                    if (!err) layer.lazyLoaded = true;
+                    this.setState({lazyLoading: false});
+                });
+            }
+
             if (layer.show) layer.show(); 
             else if (!this.map.hasLayer(layer)) layer.addTo(this.map);
         }else{
@@ -253,6 +263,7 @@ export default class LayersControlLayer extends React.Component {
     this.setState({histogramLoading: true});
     this.updateHistogramReq = $.getJSON(Utils.buildUrlWithQuery(this.meta.metaUrl, this.getLayerParams()))
         .done(mres => {
+            ColorMaps.decode(mres.color_maps);
             this.tmeta = this.props.layer[Symbol.for("tile-meta")] = mres;
             
             // Update rescale values
@@ -356,14 +367,14 @@ export default class LayersControlLayer extends React.Component {
   }
 
   render(){
-    const { colorMap, bands, hillshade, formula, histogramLoading, exportLoading } = this.state;
+    const { colorMap, bands, hillshade, formula, histogramLoading, exportLoading, lazyLoading } = this.state;
     const { meta, tmeta } = this;
     const { color_maps, algorithms, auto_bands } = tmeta;
     const algo = this.getAlgorithm(formula);
 
     let cmapValues = null;
     if (colorMap){
-        cmapValues = (color_maps.find(c => c.key === colorMap) || {}).color_map;
+        cmapValues = (color_maps.find(c => c.key === colorMap) || {}).decoded_color_map;
     }
 
     let hmin = null;
@@ -378,7 +389,7 @@ export default class LayersControlLayer extends React.Component {
 
     return (<div className="layers-control-layer">
         <div className="layer-control-title">
-            {!this.props.overlay ? <ExpandButton bind={[this, 'expanded']} className="expand-layer" /> : <div className="paddingSpace"></div>}<Checkbox bind={[this, 'visible']}/>
+            {!this.props.overlay ? <ExpandButton bind={[this, 'expanded']} className="expand-layer" /> : <div className="paddingSpace"></div>}<Checkbox bind={[this, 'visible']} bindLoading={[this, 'lazyLoading']}/>
             <a title={meta.name} className="layer-label" href="javascript:void(0);" onClick={this.handleLayerClick}><i className={"layer-icon " + (meta.icon || "fa fa-vector-square fa-fw")}></i><div className="layer-title">{meta.name}</div></a> {meta.raster ? <a className="layer-action" href="javascript:void(0)" onClick={this.handleSideClick}><i title={_("Side By Side")} className={"fa fa-fw " + this.sideIcon()}></i></a> : ""}<a className="layer-action" href="javascript:void(0)" onClick={this.handleZoomToClick}><i title={_("Zoom To")} className="fa fa-expand"></i></a>
         </div>
 

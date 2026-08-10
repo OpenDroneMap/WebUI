@@ -1,7 +1,7 @@
 {
   "name": "WebODM",
-  "version": "2.9.4",
-  "description": "User-friendly, extendable application and API for processing aerial imagery.",
+  "version": "3.2.5",
+  "description": "User-friendly, commercial-grade software for processing aerial imagery.",
   "main": "index.js",
   "scripts": {
     "test": "python manage.py test app.tests.test_generate_ui_mocks && jest",
@@ -9,17 +9,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OpenDroneMap/WebODM.git"
+    "url": "git+https://github.com/WebODM/WebODM.git"
   },
   "keywords": [
-    "opendronemap"
+    "webodm"
   ],
   "author": "Piero Toffanin",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/OpenDroneMap/WebODM/issues"
+    "url": "https://github.com/WebODM/WebODM/issues"
   },
-  "homepage": "https://github.com/OpenDroneMap/WebODM#readme",
+  "homepage": "https://github.com/WebODM/WebODM#readme",
   "dependencies": {
     "@babel/core": "^7.0.0-beta.54",
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.54",
@@ -73,7 +73,7 @@
     "tween.js": "^16.6.0",
     "url-loader": "^0.5.7",
     "webpack": "5.89.0",
-    "webpack-bundle-tracker": "0.4.3",
+    "webpack-bundle-tracker": "3.1.1",
     "webpack-livereload-plugin": "3.0.2"
   }
 }

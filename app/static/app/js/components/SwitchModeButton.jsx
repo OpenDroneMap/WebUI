@@ -30,10 +30,15 @@ class SwitchModeButton extends React.Component {
   handleClick(){
     if (this.props.task){
       const target = this.props.type === 'mapToModel' ? '3d' : 'map';
-
-      let url = this.props.public ? 
-                `../${target}/`
-              : `/${target}/project/${this.props.task.project}/task/${this.props.task.id}/`;
+      
+      let url = `/${target}/project/${this.props.task.project}/task/${this.props.task.id}/`;
+      if (this.props.public){
+        if (location.href.indexOf("/iframe/") !== -1){
+          url = `/public/task/${this.props.task.id}/iframe/${target}/`;
+        }else{
+          url = `/public/task/${this.props.task.id}/${target}/`;
+        }
+      }
       
       location.href = url;
     }
@@ -53,6 +58,7 @@ class SwitchModeButton extends React.Component {
         style={this.props.style}
         onClick={this.handleClick}
         type="button"
+        title={this.text()}
         className={"switchModeButton btn btn-sm btn-secondary " + (!this.props.task ? "hide" : "")}>
         <i className={"fa " + (this.icon())}></i> {this.text()}
       </button>
