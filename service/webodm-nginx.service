@@ -1,5 +1,5 @@
 [Unit]
-Description=Start WebODM Nginx Service Container
+Description=Start OpenDroneMap WebUI Nginx Service Container
 After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]

@@ -19,7 +19,7 @@ class Command(BaseCommand):
     def handle(self, **options):
         if options.get('action') == 'mediapattern':
             print("# BorgBackup pattern file for media directory")
-            print("# Generated with WebODM")
+            print("# Generated with OpenDroneMap WebUI")
             print("")
 
             print("# Skip anything but project folder")

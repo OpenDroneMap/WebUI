@@ -31,7 +31,7 @@ def boot():
     booted.value = True
     logger = logging.getLogger('app.logger')
 
-    logger.info("Booting WebODM {}".format(settings.VERSION))
+    logger.info("Booting OpenDroneMap WebUI {}".format(settings.VERSION))
 
     if settings.DEBUG:
         logger.warning("Debug mode is ON (for development this is OK)")

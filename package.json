@@ -1,5 +1,5 @@
 {
-  "name": "WebODM",
+  "name": "OpenDroneMap WebUI",
   "version": "3.2.5",
   "description": "User-friendly, commercial-grade software for processing aerial imagery.",
   "main": "index.js",

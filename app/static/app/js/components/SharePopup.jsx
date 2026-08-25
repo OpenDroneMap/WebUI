@@ -174,7 +174,7 @@ class SharePopup extends React.Component{
   render(){
     const shareLink = Utils.absoluteUrl(this.getRelShareLink());
     const iframeUrl = Utils.absoluteUrl(this.getRelShareLink({iframe: true}));
-    const iframeCode = `<iframe scrolling="no" title="WebODM" width="61.8033%" height="360" frameBorder="0" src="${iframeUrl}"></iframe>`;
+    const iframeCode = `<iframe scrolling="no" title="OpenDroneMap WebUI" width="61.8033%" height="360" frameBorder="0" src="${iframeUrl}"></iframe>`;
     const isPublic = this.getObjProp('public');
     const projectPopup = !this.state.task && this.state.project;
     const title = this.state.task ? _("Share This Task") : _("Share This Project");
@@ -229,7 +229,7 @@ class SharePopup extends React.Component{
               <div className="alert alert-warning alert-dismissable link-alert">
                 <button type="button" className="close" title={_("Dismiss")} onClick={this.hideLocalLinkAlert}><span aria-hidden="true">&times;</span></button>
                 <i className="fa fa-exclamation-triangle"></i>
-                <span dangerouslySetInnerHTML={{__html: interpolate(_("The link below is accessible only within your local network. To share a link with others online, use a %(service)s"), {service: `<a href="https://github.com/WebODM/WebODM/blob/master/HOSTED.md" target="_blank">${_("hosted instance")}</a>`})}}></span>
+                <span dangerouslySetInnerHTML={{__html: interpolate(_("The link below is accessible only within your local network. To share a link with others online, use a %(service)s"), {service: `<a href="https://github.com/OpenDroneMap WebUI/OpenDroneMap WebUI/blob/master/HOSTED.md" target="_blank">${_("hosted instance")}</a>`})}}></span>
               </div>
             : ""}
             

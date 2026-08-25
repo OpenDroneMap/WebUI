@@ -13,7 +13,7 @@ If so, do not open an issue. We already know about it and steps to solve it are 
 
 Every issue needs to follow the format specified below. Do not remove the questions, simply answer each question by typing below it. If you don't know how to answer a question, write so. Questions that don't follow these guidelines will be automatically closed by our friendly IssueBot (who's not very smart and needs to see a particular format to keep an issue open).
 ****************************************
-### How did you install WebODM (docker, installer, etc.)?
+### How did you install OpenDroneMap WebUI (docker, installer, etc.)?
 
 [Type answer here]
 

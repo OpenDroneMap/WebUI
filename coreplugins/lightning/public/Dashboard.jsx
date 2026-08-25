@@ -58,7 +58,7 @@ export default class Dashboard extends React.Component {
         }else if (json.message === "Unauthorized"){
             this.props.onLogout();
         }else{
-            this.setState({ error: _('Cannot load lightning dashboard. Are you running the latest version of WebODM?') });
+            this.setState({ error: _('Cannot load lightning dashboard. Are you running the latest version of OpenDroneMap WebUI?') });
         }
     })
     .fail(() => {

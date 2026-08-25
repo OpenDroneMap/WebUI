@@ -1,7 +1,7 @@
 {
   "name": "Align generator service",
   "webodmMinVersion": "0.6.2",
-  "description": "Plugin to get align from external service for WebODM",
+  "description": "Plugin to get align from external service for OpenDroneMap WebUI",
   "version": "1.0.0",
   "author": "Diego Acuña, Greenbot Labs",
   "email": "contacto@greenbot.cl",

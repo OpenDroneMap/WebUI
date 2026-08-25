@@ -175,7 +175,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='setting',
             name='organization_name',
-            field=models.CharField(blank=True, default='WebODM', help_text='The name of your organization', max_length=255, null=True, verbose_name='Organization name'),
+            field=models.CharField(blank=True, default='OpenDroneMap WebUI', help_text='The name of your organization', max_length=255, null=True, verbose_name='Organization name'),
         ),
         migrations.AlterField(
             model_name='setting',

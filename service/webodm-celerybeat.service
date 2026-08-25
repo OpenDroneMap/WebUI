@@ -1,5 +1,5 @@
 [Unit]
-Description=Start WebODM Celery Scheduler Service Container
+Description=Start OpenDroneMap WebUI Celery Scheduler Service Container
 Requires=webodm-gunicorn.service
 After=webodm-gunicorn.service
 

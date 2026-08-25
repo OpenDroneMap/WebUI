@@ -178,36 +178,36 @@ fi
 usage(){
   echo "Usage: $0 <command>"
   echo
-  echo "This program helps to manage the setup/teardown of the docker containers for running WebODM. We recommend that you read the full documentation of docker at https://docs.docker.com if you want to customize your setup."
+  echo "This program helps to manage the setup/teardown of the docker containers for running OpenDroneMap WebUI. We recommend that you read the full documentation of docker at https://docs.docker.com if you want to customize your setup."
   echo
   echo "Command list:"
-  echo "	start [options]		Start WebODM"
-  echo "	stop			Stop WebODM"
-  echo "	down			Stop and remove WebODM's docker containers"
-  echo "	update			Update WebODM to the latest release"
-  echo "	liveupdate		Update WebODM to the latest release without stopping it"
+  echo "	start [options]		Start OpenDroneMap WebUI"
+  echo "	stop			Stop OpenDroneMap WebUI"
+  echo "	down			Stop and remove OpenDroneMap WebUI's docker containers"
+  echo "	update			Update OpenDroneMap WebUI to the latest release"
+  echo "	liveupdate		Update OpenDroneMap WebUI to the latest release without stopping it"
   echo "	rebuild			Rebuild all docker containers and perform cleanups"
   echo "	checkenv		Do an environment check and install missing components"
   echo "	test [frontend|backend] [args]	Run tests (all tests, or just frontend/backend with optional arguments)"
-  echo "	resetadminpassword \"<new password>\"	Reset the administrator's password to a new one. WebODM must be running when executing this command and the password must be enclosed in double quotes."
+  echo "	resetadminpassword \"<new password>\"	Reset the administrator's password to a new one. OpenDroneMap WebUI must be running when executing this command and the password must be enclosed in double quotes."
   echo ""
   echo "Options:"
-  echo "	--port	<port>	Set the port that WebODM should bind to (default: $DEFAULT_PORT)"
-  echo "	--hostname	<hostname>	Set the hostname that WebODM will be accessible from (default: $DEFAULT_HOST)"
+  echo "	--port	<port>	Set the port that OpenDroneMap WebUI should bind to (default: $DEFAULT_PORT)"
+  echo "	--hostname	<hostname>	Set the hostname that OpenDroneMap WebUI will be accessible from (default: $DEFAULT_HOST)"
   echo "	--media-dir	<path>	Path where processing results will be stored to (default: $DEFAULT_MEDIA_DIR (docker named volume))"
   echo "	--db-dir	<path>	Path where the Postgres db data will be stored to (default: $DEFAULT_DB_DIR (docker named volume))"
   echo "	--node-dir	<path>	Path where temporary files will be stored during processing when using the default node (default: docker container storage)"
-  echo "	--default-nodes	Whether to create a processing node attached to WebODM on startup (default: $DEFAULT_NODES)"
-  echo "	--with-micmac	Create a NodeMICMAC node attached to WebODM on startup. Experimental! (default: disabled)"
+  echo "	--default-nodes	Whether to create a processing node attached to OpenDroneMap WebUI on startup (default: $DEFAULT_NODES)"
+  echo "	--with-micmac	Create a NodeMICMAC node attached to OpenDroneMap WebUI on startup. Experimental! (default: disabled)"
   echo "	--ssl	Enable SSL and automatically request and install a certificate from letsencrypt.org. (default: $DEFAULT_SSL)"
   echo "	--ssl-key	<path>	Manually specify a path to the private key file (.pem) to use with nginx to enable SSL (default: None)"
   echo "	--ssl-cert	<path>	Manually specify a path to the certificate file (.pem) to use with nginx to enable SSL (default: None)"
   echo "	--ssl-insecure-port-redirect	<port>	Insecure port number to redirect from when SSL is enabled (default: $DEFAULT_SSL_INSECURE_PORT_REDIRECT)"
   echo "	--debug	Enable debug for development environments (default: disabled)"
-  echo "	--dev	Enable development mode. In development mode you can make modifications to WebODM source files and changes will be reflected live. (default: disabled)"
+  echo "	--dev	Enable development mode. In development mode you can make modifications to OpenDroneMap WebUI source files and changes will be reflected live. (default: disabled)"
   echo "	--dev-watch-plugins	Automatically build plugins while in dev mode. (default: disabled)"
   echo "	--broker	Set the URL used to connect to the celery broker (default: $DEFAULT_BROKER)"
-  echo "	--detached	Run WebODM in detached mode. This means WebODM will run in the background, without blocking the terminal (default: disabled)"
+  echo "	--detached	Run OpenDroneMap WebUI in detached mode. This means OpenDroneMap WebUI will run in the background, without blocking the terminal (default: disabled)"
   echo "	--gpu	Use GPU NodeODM nodes (Linux only) (default: disabled)"
   echo "	--settings	Path to a settings.py file to enable modifications of system settings (default: None)"
   echo "	--worker-memory	Maximum amount of memory allocated for the worker process (default: unlimited)"
@@ -321,7 +321,7 @@ check_command(){
 			# Recurse, but don't pass the install command
 			check_command "$1" "$2"
 		else
-			check_msg_result="\033[91m can't find $1! Check that the program is installed and that you have added the proper path to the program to your PATH environment variable before launching WebODM. If you change your PATH environment variable, remember to close and reopen your terminal. $2\033[39m"
+			check_msg_result="\033[91m can't find $1! Check that the program is installed and that you have added the proper path to the program to your PATH environment variable before launching OpenDroneMap WebUI. If you change your PATH environment variable, remember to close and reopen your terminal. $2\033[39m"
 		fi
 	fi
 
@@ -403,10 +403,10 @@ start(){
 	get_secret
 
 	if [[ $dev_mode = true ]]; then
-		echo "Starting WebODM in development mode..."
+		echo "Starting OpenDroneMap WebUI in development mode..."
 		down
 	else
-		echo "Starting WebODM..."
+		echo "Starting OpenDroneMap WebUI..."
 	fi
 	echo ""
 	echo "Using the following environment:"
@@ -489,7 +489,7 @@ start(){
 
 		# Make sure we have a hostname
 		if [ "$WO_HOST" = "localhost" ]; then
-			echo -e "\033[91mSSL is enabled, but hostname cannot be set to $WO_HOST. Set the --hostname argument to the domain of your WebODM server (for example: www.mywebodm.org).\033[39m"
+			echo -e "\033[91mSSL is enabled, but hostname cannot be set to $WO_HOST. Set the --hostname argument to the domain of your OpenDroneMap WebUI server (for example: www.mywebodm.org).\033[39m"
 			exit 1
 		fi
 
@@ -545,7 +545,7 @@ rebuild(){
 	run "rm -fr nodeodm/external/NodeODM || sudo rm -fr nodeodm/external/NodeODM"
 	run "$docker_compose -f docker-compose.yml -f docker-compose.build.yml build --no-cache"
 	#run "docker images --no-trunc -aqf \"dangling=true\" | xargs docker rmi"
-	echo -e "\033[1mDone!\033[0m You can now start WebODM by running $0 start"
+	echo -e "\033[1mDone!\033[0m You can now start OpenDroneMap WebUI by running $0 start"
 }
 
 run_tests(){
@@ -583,14 +583,14 @@ resetpassword(){
 	if [[ -n "$newpass" ]]; then
 		container_hash=$(docker ps -q --filter "name=webapp")
 		if [[ -z "$container_hash" ]]; then
-			echo -e "\033[91mCannot find webapp docker container. Is WebODM running?\033[39m"
+			echo -e "\033[91mCannot find webapp docker container. Is OpenDroneMap WebUI running?\033[39m"
 			exit 1
 		fi
 
 		if docker exec "$container_hash" bash -c "echo \"from django.contrib.auth.models import User;from django.contrib.auth.hashers import make_password;u=User.objects.filter(is_superuser=True)[0];u.password=make_password('$newpass');u.save();print('The following user was changed: {}'.format(u.username));\" | python manage.py shell"; then
 			echo -e "\033[1mPassword changed!\033[0m"
 		else
-			echo -e "\033[91mCould not change administrator password. If you need help, please visit https://github.com/WebODM/WebODM/issues/ \033[39m"
+			echo -e "\033[91mCould not change administrator password. If you need help, please visit https://github.com/OpenDroneMap WebUI/OpenDroneMap WebUI/issues/ \033[39m"
 		fi
 	else
 		usage
@@ -598,7 +598,7 @@ resetpassword(){
 }
 
 update(){
-	echo "Updating WebODM..."
+	echo "Updating OpenDroneMap WebUI..."
 
 	hash git 2>/dev/null || git_not_found=true
 	if [[ $git_not_found ]]; then
@@ -637,7 +637,7 @@ if [[ $1 = "start" ]]; then
 	start
 elif [[ $1 = "stop" ]]; then
 	environment_check
-	echo "Stopping WebODM..."
+	echo "Stopping OpenDroneMap WebUI..."
 
 	command="$docker_compose -f docker-compose.yml"
 
@@ -651,22 +651,22 @@ elif [[ $1 = "stop" ]]; then
 	run "${command}"
 elif [[ $1 = "restart" ]]; then
 	environment_check
-	echo "Restarting WebODM..."
+	echo "Restarting OpenDroneMap WebUI..."
 	down
 	start
 elif [[ $1 = "down" ]]; then
 	environment_check
-	echo "Tearing down WebODM..."
+	echo "Tearing down OpenDroneMap WebUI..."
 	down
 elif [[ $1 = "rebuild" ]]; then
 	environment_check
-	echo  "Rebuilding WebODM..."
+	echo  "Rebuilding OpenDroneMap WebUI..."
 	rebuild
 elif [[ $1 = "update" ]]; then
 	environment_check
 	down
 	update
-	echo -e "\033[1mDone!\033[0m You can now start WebODM by running $0 start"
+	echo -e "\033[1mDone!\033[0m You can now start OpenDroneMap WebUI by running $0 start"
 elif [[ $1 = "liveupdate" ]]; then
 	environment_check
 	update

@@ -1,4 +1,4 @@
-# WebODM Requirements - Updated for Alpine 3.22 with Latest Versions
+# OpenDroneMap WebUI Requirements - Updated for Alpine 3.22 with Latest Versions
 # Python 3.12, Django 5.2 LTS, Celery 5.5
 
 # Core Django Framework

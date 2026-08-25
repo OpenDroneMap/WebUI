@@ -1,6 +1,6 @@
 # Chaining this file to the main docker-compose file adds
 # a default processing node instance. This is best for users
-# who are just getting started with WebODM.
+# who are just getting started with OpenDroneMap WebUI.
 
 version: '2.1'
 services:

@@ -265,7 +265,7 @@ class PluginAdmin(admin.ModelAdmin):
         try:
             p = enable_plugin(plugin_name)
             if p.requires_restart():
-                messages.warning(request, _("Restart required. Please restart WebODM to enable %(plugin)s") % {
+                messages.warning(request, _("Restart required. Please restart OpenDroneMap WebUI to enable %(plugin)s") % {
                     'plugin': plugin_name})
         except Exception as e:
             messages.warning(request, _("Cannot enable plugin %(plugin)s: %(message)s") % {'plugin': plugin_name,
@@ -277,7 +277,7 @@ class PluginAdmin(admin.ModelAdmin):
         try:
             p = disable_plugin(plugin_name)
             if p.requires_restart():
-                messages.warning(request, _("Restart required. Please restart WebODM to fully disable %(plugin)s") % {
+                messages.warning(request, _("Restart required. Please restart OpenDroneMap WebUI to fully disable %(plugin)s") % {
                     'plugin': plugin_name})
         except Exception as e:
             messages.warning(request, _("Cannot disable plugin %(plugin)s: %(message)s") % {'plugin': plugin_name,

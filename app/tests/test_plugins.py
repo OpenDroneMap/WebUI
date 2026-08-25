@@ -109,7 +109,7 @@ class TestPlugins(BootTestCase):
 
         res = client.get('/plugins/test/app_dynamic_script.js?print=1')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertTrue(res.content.decode('utf-8') == "console.log('Hello WebODM');")  # Empty
+        self.assertTrue(res.content.decode('utf-8') == "console.log('Hello OpenDroneMap WebUI');")  # Empty
 
         # Check that the plugins media dirs have been created
         self.assertTrue(os.path.exists(get_plugins_persistent_path()))

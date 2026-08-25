@@ -141,7 +141,7 @@ def process_task(taskId):
                 return
             else:
                 # Expired
-                logger.warning("Task {} has an expired lock! This could mean that WebODM is running out of memory. Check your server configuration.".format(taskId))
+                logger.warning("Task {} has an expired lock! This could mean that OpenDroneMap WebUI is running out of memory. Check your server configuration.".format(taskId))
 
         # Set lock
         def update_lock():

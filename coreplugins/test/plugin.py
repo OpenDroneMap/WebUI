@@ -34,7 +34,7 @@ class Plugin(PluginBase):
         # Show script only if '?print=1' is set
         def dynamic_cb(request):
             if 'print' in request.GET:
-                return {'name': 'WebODM'} # Test template substitution
+                return {'name': 'OpenDroneMap WebUI'} # Test template substitution
             else:
                 return False
 

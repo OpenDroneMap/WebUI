@@ -2586,7 +2586,7 @@ var Dropzone = function (_Emitter) {
       // Clumsy way of handling asynchronous calls, until I get to add a proper Future library.
       var doneCounter = 0;
 
-      // Modified for WebODM
+      // Modified for OpenDroneMap WebUI
       _this17.emit("transformstart", files);
 
       var process = function(i){

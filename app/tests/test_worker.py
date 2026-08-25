@@ -22,7 +22,7 @@ class TestWorker(BootTestCase):
         pass
 
     def test_redis(self):
-        # We can connect to redis. Other parts of the WebODM test suite
+        # We can connect to redis. Other parts of the OpenDroneMap WebUI test suite
         # rely on a valid redis connection.
         self.assertTrue(redis_client.ping())
 

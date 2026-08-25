@@ -1,5 +1,5 @@
 [Unit]
-Description=Start WebODM Service Container
+Description=Start OpenDroneMap WebUI Service Container
 Requires=docker.service
 After=docker.service
 

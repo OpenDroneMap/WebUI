@@ -1,4 +1,4 @@
-# Contributing to WebODM
+# Contributing to OpenDroneMap WebUI
 
 :tada: First off, thanks for taking the time to contribute! :tada:
 
@@ -20,4 +20,4 @@ Be prepared to answer any questions about the logic from your changes.
 
 ## Scope
 
-This contributing document shall apply to all WebODM projects, unless a project defines its own separate contributing document.
+This contributing document shall apply to all OpenDroneMap WebUI projects, unless a project defines its own separate contributing document.

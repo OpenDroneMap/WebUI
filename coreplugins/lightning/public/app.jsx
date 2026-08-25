@@ -40,7 +40,7 @@ export default class LightningPanel extends React.Component {
         { !apiKey ? 
         <div>
             <h4><i className="fa fa-bolt"/> {_("Lightning")}</h4>
-            <p>{_("Lightning is a cloud service built by WebODM developers that allows you to:")}</p>
+            <p>{_("Lightning is a cloud service built by OpenDroneMap WebUI developers that allows you to:")}</p>
             <ul>
               <li><Trans params={{ link: '<a href="https://webodm.net/lgt" target="_blank">LGT</a>'}}>
                   {_("Quickly process datasets with high performance servers powered by the %(link)s photogrammetry engine")}

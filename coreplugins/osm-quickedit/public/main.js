@@ -119,7 +119,7 @@ PluginsAPI.Map.addActionButton(function (options) {
             right: options.map.getBounds().getEast(),
             top: options.map.getBounds().getNorth(),
             changeset_comment: "",
-            changeset_source: encodeURIComponent("WebODM - " + taskTitle),
+            changeset_source: encodeURIComponent("OpenDroneMap WebUI - " + taskTitle),
             new_layer: false,
           };
           sendJOSMCmd("http://127.0.0.1:8111/load_and_zoom", loadAndZoomParams);

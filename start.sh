@@ -99,14 +99,14 @@ congrats(){
         echo "Congratulations! └@(･◡･)@┐"
         echo ==========================
         echo -e "\033[39m"
-        echo "If there are no errors, WebODM should be up and running!"
+        echo "If there are no errors, OpenDroneMap WebUI should be up and running!"
     else    
         echo -e "\033[93m"
         echo "Something doesn't look right! ¯\_(ツ)_/¯"
         echo "The server returned a status code of $status when we tried to reach it."
         echo ==========================
         echo -e "\033[39m"
-        echo "Check if WebODM is running, maybe we tried to reach it too soon."
+        echo "Check if OpenDroneMap WebUI is running, maybe we tried to reach it too soon."
     fi
 
     echo -e "\033[93m"
