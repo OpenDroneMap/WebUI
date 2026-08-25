@@ -3,4 +3,4 @@
 	url = https://github.com/WebODM/NodeODX
 [submodule "locale"]
 	path = locale
-	url = https://github.com/WebODM/WebODM-Locale
+	url = https://github.com/OpenDroneMap/WebUI-Locale

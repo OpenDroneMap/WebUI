@@ -4,13 +4,13 @@
 
 ## How can I contribute?
 
-Contributors are expected to follow the [Collective Code Construction Contract (C4)](https://github.com/WebODM/WebODM/blob/master/CODE_OF_CONDUCT.md).
+Contributors are expected to follow the [Collective Code Construction Contract (C4)](https://github.com/OpenDroneMap/WebUI/blob/master/CODE_OF_CONDUCT.md).
 
 Come hang out on the #devtalk channel on Discord if you have any questions. https://webodm.org/community
 
 ## Code of Conduct
 
-You must adheres to the [Contributor Code of Conduct](https://github.com/WebODM/WebODM/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+You must adheres to the [Contributor Code of Conduct](https://github.com/OpenDroneMap/WebUI/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
 
 ## Use of AI
 

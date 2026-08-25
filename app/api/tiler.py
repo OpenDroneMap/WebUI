@@ -245,7 +245,7 @@ class Metadata(TilerTaskView):
                 if has_alpha_band(src.dataset):
                     band_count -= 1
                 nodata = None
-                # Workaround for https://github.com/WebODM/WebODM/issues/894
+                # Workaround for https://github.com/OpenDroneMap/WebUI/issues/894
                 if tile_type == 'orthophoto':
                     nodata = 0
                 histogram_options = {"bins": 255, "range": hrange}
@@ -524,7 +524,7 @@ class Tiles(TilerTaskView):
                 elif has_alpha:
                     indexes = non_alpha_indexes(src.dataset)
 
-            # Workaround for https://github.com/WebODM/WebODM/issues/894
+            # Workaround for https://github.com/OpenDroneMap/WebUI/issues/894
             if nodata is None and tile_type == 'orthophoto':
                 nodata = 0
 

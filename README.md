@@ -21,4 +21,4 @@ OpenDroneMap WebUI is licensed under the terms of the [GNU Affero General Public
 
 # Trademark
 
-See [Trademark Guidelines](https://github.com/WebODM/WebODM/blob/master/TRADEMARK.md)
+See [Trademark Guidelines](https://github.com/OpenDroneMap/WebUI/blob/master/TRADEMARK.md)

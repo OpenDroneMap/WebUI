@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/WebODM/WebODM.git"
+    "url": "git+https://github.com/OpenDroneMap/WebUI.git"
   },
   "keywords": [
     "webodm"
@@ -17,9 +17,9 @@
   "author": "Piero Toffanin",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/WebODM/WebODM/issues"
+    "url": "https://github.com/OpenDroneMap/WebUI/issues"
   },
-  "homepage": "https://github.com/WebODM/WebODM#readme",
+  "homepage": "https://github.com/OpenDroneMap/WebUI#readme",
   "dependencies": {
     "@babel/core": "^7.0.0-beta.54",
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.54",
