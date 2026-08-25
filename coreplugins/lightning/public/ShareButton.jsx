@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { _ } from 'webodm/classes/gettext';
+import { _ } from 'webui/classes/gettext';
 import ShareDialog from './ShareDialog';
 
 export default class ShareButton extends React.Component {

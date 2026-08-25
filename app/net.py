@@ -1,6 +1,6 @@
 import urllib3.util.connection as ul3conn
 import dns.resolver
-from webodm import settings
+from webui import settings
 
 dns_cache = {}
 patched = False

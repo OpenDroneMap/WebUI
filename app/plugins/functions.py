@@ -222,13 +222,13 @@ def get_plugins():
 
                 # Check version
                 manifest = plugin.get_manifest()
-                if 'webodmMinVersion' in manifest:
-                    min_version = manifest['webodmMinVersion']
+                if 'webuiMinVersion' in manifest:
+                    min_version = manifest['webuiMinVersion']
                     manifest_path = os.path.join(plugin_path, "manifest.json")
 
                     if versionToInt(min_version) > versionToInt(settings.VERSION):
                         logger.warning(
-                            "In {} webodmMinVersion is set to {} but OpenDroneMap WebUI version is {}. Plugin will not be loaded. Update OpenDroneMap WebUI.".format(
+                            "In {} webuiMinVersion is set to {} but OpenDroneMap WebUI version is {}. Plugin will not be loaded. Update OpenDroneMap WebUI.".format(
                                 manifest_path, min_version, settings.VERSION))
                         continue
 

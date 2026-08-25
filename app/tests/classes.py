@@ -8,7 +8,7 @@ from shutil import rmtree
 
 from app.boot import boot
 from app.models import Project
-from webodm import settings
+from webui import settings
 
 
 def setupUsers():

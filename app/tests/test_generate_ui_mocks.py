@@ -21,7 +21,7 @@ from app.api.projects import ProjectSerializer
 from app.api.tasks import TaskSerializer
 from app.models import Project
 from app.models import Task
-from webodm import settings
+from webui import settings
 from .classes import BootTestCase
 from app.models import Preset
 from app.api.presets import PresetSerializer

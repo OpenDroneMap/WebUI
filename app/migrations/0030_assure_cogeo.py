@@ -5,7 +5,7 @@ from app.cogeo import assure_cogeo
 from django.db import migrations
 import glob
 import os
-from webodm import settings
+from webui import settings
 
 def find_and_assure_cogeo(apps, schema_editor):
     for asset_filename in ["odm_orthophoto.tif", "dsm.tif", "dtm.tif"]:

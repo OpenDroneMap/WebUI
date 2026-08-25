@@ -25,6 +25,6 @@ sleep $WAIT_SECONDS
 
 echo "🧪 Running tests..."
 # Pass remaining arguments
-docker compose exec -T webapp /webodm/webodm.sh test "$@"
+docker compose exec -T webapp /webui/webui.sh test "$@"
 
 echo "✅ Tests completed successfully!"

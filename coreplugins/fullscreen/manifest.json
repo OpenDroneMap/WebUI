@@ -1,6 +1,6 @@
 {
 	"name": "Fullscreen Button",
-	"webodmMinVersion": "0.5.0",
+	"webuiMinVersion": "0.5.0",
 	"description": "Add a fullscreen button to the 2D map view",
 	"version": "1.0.0",
 	"author": "Piero Toffanin",

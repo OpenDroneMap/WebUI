@@ -1,6 +1,6 @@
 from worker import tasks
 import redis
-from webodm import settings
+from webui import settings
 
 redis_client = redis.Redis().from_url(settings.CELERY_BROKER_URL)
 

@@ -1,6 +1,6 @@
 {
 	"name": "Short Links",
-	"webodmMinVersion": "1.9.3",
+	"webuiMinVersion": "1.9.3",
 	"description": "Create short links when sharing task URLs",
 	"version": "1.0.0",
 	"author": "Piero Toffanin",

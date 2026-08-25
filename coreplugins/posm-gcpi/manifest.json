@@ -1,6 +1,6 @@
 {
 	"name": "POSM GCP Interface",
-	"webodmMinVersion": "0.5.0",
+	"webuiMinVersion": "0.5.0",
 	"description": "A plugin to create GCP files from images",
 	"version": "0.4.0",
 	"author": "Eric Brelsford, Piero Toffanin",

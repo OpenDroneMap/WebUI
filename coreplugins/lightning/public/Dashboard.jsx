@@ -1,10 +1,10 @@
 import React from 'react';
-import ErrorMessage from 'webodm/components/ErrorMessage';
+import ErrorMessage from 'webui/components/ErrorMessage';
 import PropTypes from 'prop-types';
 import './Dashboard.scss';
 import $ from 'jquery';
-import { _ } from 'webodm/classes/gettext';
-import Trans from 'webodm/components/Trans';
+import { _ } from 'webui/classes/gettext';
+import Trans from 'webui/components/Trans';
 
 export default class Dashboard extends React.Component {
   static defaultProps = {

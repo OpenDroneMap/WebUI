@@ -16,7 +16,7 @@ from rio_tiler.errors import InvalidColorMapName
 from app.api.hsvblend import hsv_blend
 from app.api.hillshade import LightSource
 from rio_tiler.io import COGReader
-from webodm import settings
+from webui import settings
 
 logger = logging.getLogger('app.logger')
 

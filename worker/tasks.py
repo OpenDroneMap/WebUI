@@ -17,7 +17,7 @@ from app.models import Project
 from app.models import Task
 from nodeodm import status_codes
 from nodeodm.models import ProcessingNode
-from webodm import settings
+from webui import settings
 import worker
 from .celery import app
 from app.raster_utils import export_raster as export_raster_sync, extension_for_export_format

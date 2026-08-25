@@ -9,7 +9,7 @@ from app.api.tasks import TaskSerializer
 from app.models import Basemap
 from app.views.utils import get_permissions, get_task_or_raise, get_project_or_raise, handle_302, csrf_samesite_none_if_secure
 from django.views.decorators.csrf import ensure_csrf_cookie
-from webodm import settings
+from webui import settings
 
 def get_public_task(task_pk):
     """

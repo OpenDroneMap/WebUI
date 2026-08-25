@@ -31,9 +31,9 @@ services:
   webapp:
     build: .
     container_name: webapp
-    entrypoint: /bin/bash -c "crond && chmod +x /webodm/*.sh && /bin/bash -c \"/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 broker:6379 -- /webodm/start.sh\""
+    entrypoint: /bin/bash -c "crond && chmod +x /webui/*.sh && /bin/bash -c \"/webui/wait-for-postgres.sh db /webui/wait-for-it.sh -t 0 broker:6379 -- /webui/start.sh\""
     volumes:
-      - ${WO_MEDIA_DIR}:/webodm/app/media:z
+      - ${WO_MEDIA_DIR}:/webui/app/media:z
     ports:
       - "${WO_PORT}:8000"
     depends_on:
@@ -60,9 +60,9 @@ services:
   worker:
     build: .
     container_name: worker
-    entrypoint: /bin/bash -c "/webodm/wait-for-postgres.sh db /webodm/wait-for-it.sh -t 0 broker:6379 -- /webodm/wait-for-it.sh -t 0 webapp:8000 -- /webodm/worker.sh start"
+    entrypoint: /bin/bash -c "/webui/wait-for-postgres.sh db /webui/wait-for-it.sh -t 0 broker:6379 -- /webui/wait-for-it.sh -t 0 webapp:8000 -- /webui/worker.sh start"
     volumes:
-      - ${WO_MEDIA_DIR}:/webodm/app/media:z
+      - ${WO_MEDIA_DIR}:/webui/app/media:z
     depends_on:
       - db
       - broker

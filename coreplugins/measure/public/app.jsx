@@ -3,12 +3,12 @@ import './app.scss';
 import 'leaflet-measure-ex/dist/leaflet-measure';
 import 'leaflet-measure-ex/dist/leaflet-measure.css';
 import MeasurePopup from './MeasurePopup';
-import Utils from 'webodm/classes/Utils';
+import Utils from 'webui/classes/Utils';
 import ReactDOM from 'ReactDOM';
 import React from 'React';
 import $ from 'jquery';
-import { _, get_format } from 'webodm/classes/gettext';
-import { unitSystem } from 'webodm/classes/Units';
+import { _, get_format } from 'webui/classes/gettext';
+import { unitSystem } from 'webui/classes/Units';
 
 export default class App{
     constructor(map){

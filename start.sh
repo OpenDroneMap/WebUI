@@ -47,7 +47,7 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ]; then
     cd nodeodm/external/NodeODM
     npm install
 
-    cd /webodm
+    cd /webui
 
     echo Setup pip requirements...
     pip install -r requirements.txt
@@ -60,8 +60,8 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ]; then
 fi
 
 
-mkdir -p /webodm/app/media/tmp
-mkdir -p /webodm/app/media_test/tmp
+mkdir -p /webui/app/media/tmp
+mkdir -p /webui/app/media_test/tmp
  
 echo Running migrations
 python manage.py migrate
@@ -118,8 +118,8 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ] || [ "$1" = "--no-
     congrats
     python manage.py runserver 0.0.0.0:8000
 else
-    if [ -e /webodm ] && [ ! -e /webodm/build/static ]; then
-       echo -e "\033[91mWARN:\033[39m /webodm/build/static does not exist, CSS, JS and other files might not be available."
+    if [ -e /webui ] && [ ! -e /webui/build/static ]; then
+       echo -e "\033[91mWARN:\033[39m /webui/build/static does not exist, CSS, JS and other files might not be available."
     fi
 
     echo "Generating nginx configurations from templates..."
@@ -152,7 +152,7 @@ else
     congrats
 
     nginx -c $(pwd)/nginx/$conf
-    gunicorn webodm.wsgi --bind unix:/tmp/gunicorn.sock --timeout 300000 --max-requests 5000 --workers $WEB_CONCURRENCY --preload
+    gunicorn webui.wsgi --bind unix:/tmp/gunicorn.sock --timeout 300000 --max-requests 5000 --workers $WEB_CONCURRENCY --preload
 fi
 
 # If this is executed, it means the previous command failed, don't display the congratulations message

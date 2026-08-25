@@ -10,7 +10,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFit
 from django.utils.translation import gettext_lazy as _
 
-from webodm import settings
+from webui import settings
 from .theme import Theme, update_theme_css
 
 logger = logging.getLogger('app.logger')

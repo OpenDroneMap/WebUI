@@ -1,6 +1,6 @@
 {
 	"name": "Lightning",
-	"webodmMinVersion": "3.2.5",
+	"webuiMinVersion": "3.2.5",
 	"description": "Process in the cloud with webodm.net",
 	"version": "1.0.0",
 	"author": "Piero Toffanin",

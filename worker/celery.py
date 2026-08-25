@@ -1,7 +1,7 @@
 from celery import Celery
 import os
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webodm.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webui.settings')
 
 app = Celery('tasks')
 app.config_from_object('django.conf:settings', namespace='CELERY')

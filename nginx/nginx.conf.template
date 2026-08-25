@@ -16,8 +16,8 @@ http {
 
   # fallback in case we can't determine a type
   default_type application/octet-stream;
-  log_format webodm_log '$remote_addr - [$time_local] "$request" $status';
-  access_log /var/log/nginx/access.log webodm_log;
+  log_format webui_log '$remote_addr - [$time_local] "$request" $status';
+  access_log /var/log/nginx/access.log webui_log;
   sendfile on;
 
   upstream app_server {
@@ -42,16 +42,16 @@ http {
 
     # path for static files
     location /static {
-      root /webodm/build;
+      root /webui/build;
     }
 
     # path for certain media files that don't need permissions enforced
     location /media/CACHE {
-      root /webodm/app;
+      root /webui/app;
     }
     location /media/settings {
       autoindex on;
-      root /webodm/app;
+      root /webui/app;
     }
 
     location / {

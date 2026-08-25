@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from app.models import Task, Project
 from nodeodm.models import ProcessingNode
 from worker.tasks import check_quotas
-from webodm import settings
+from webui import settings
 from .classes import BootTestCase
 
 class TestQuota(BootTestCase):

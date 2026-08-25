@@ -7,7 +7,7 @@ import worker
 from app.models import Project
 from app.models import Task
 from nodeodm.models import ProcessingNode
-from webodm import settings
+from webui import settings
 from .classes import BootTestCase
 from .utils import start_processing_node
 from worker.tasks import redis_client

@@ -12,7 +12,7 @@ from app.models import Task
 from app.tests.classes import BootTransactionTestCase
 from app.tests.utils import clear_test_media_root
 from nodeodm import status_codes
-from webodm import settings
+from webui import settings
 
 
 TEST_RSULTS_DIR = os.path.join(

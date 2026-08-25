@@ -7,7 +7,7 @@ from app.models import Project
 from .classes import BootTestCase
 from guardian.shortcuts import get_perms
 
-from webodm import settings
+from webui import settings
 logger = logging.getLogger('app.logger')
 
 

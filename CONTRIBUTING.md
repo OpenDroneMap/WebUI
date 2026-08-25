@@ -6,7 +6,7 @@
 
 Contributors are expected to follow the [Collective Code Construction Contract (C4)](https://github.com/OpenDroneMap/WebUI/blob/master/CODE_OF_CONDUCT.md).
 
-Come hang out on the #devtalk channel on Discord if you have any questions. https://webodm.org/community
+Come hang out in our Discourse Community if you have any questions. https://community.opendronemap.org/invites/DGsLLWf1tr
 
 ## Code of Conduct
 

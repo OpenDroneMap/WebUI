@@ -3,7 +3,7 @@ FROM python:3.12-alpine3.22 AS builder
 LABEL maintainer="Piero Toffanin <pt@masseranolabs.com>"
 
 # Build-time variables
-ARG WORKDIR=/webodm
+ARG WORKDIR=/webui
 
 # Run-time variables
 ENV PYTHONUNBUFFERED=1
@@ -180,14 +180,14 @@ RUN <<EOT
     python manage.py translate build --safe
 
     # Remove auto-generated secret key
-    rm -f /webodm/webodm/secret_key.py
+    rm -f /webui/webui/secret_key.py
 EOT
 
 #### RUNTIME STAGE ####
 
 FROM python:3.12-alpine3.22 AS runtime
 
-ARG WORKDIR=/webodm
+ARG WORKDIR=/webui
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=$WORKDIR
@@ -269,4 +269,4 @@ COPY --from=builder /staging/entwine/build/install/lib/libentwine* /usr/lib/
 # Copy application code and built assets
 COPY --from=builder $WORKDIR $WORKDIR
 
-VOLUME /webodm/app/media
+VOLUME /webui/app/media

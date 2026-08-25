@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.test import APIClient
-from webodm import settings
+from webui import settings
 from .classes import BootTestCase
 
 class TestAutoLogin(BootTestCase):

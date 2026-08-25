@@ -1,6 +1,6 @@
 {
 	"name": "GPS Location",
-	"webodmMinVersion": "0.5.0",
+	"webuiMinVersion": "0.5.0",
 	"description": "Add a GPS location button to the 2D map view",
 	"version": "1.0.0",
 	"author": "Piero Toffanin",

@@ -26,7 +26,7 @@ from app.plugins import get_plugin_by_name, enable_plugin, disable_plugin, delet
 from .models import Project, Task, Setting, Theme
 from django import forms
 from codemirror2.widgets import CodeMirrorEditor
-from webodm import settings
+from webui import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.translation import gettext_lazy as _, gettext
 

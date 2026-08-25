@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './SLControls.scss';
-import ErrorMessage from 'webodm/components/ErrorMessage';
-import { _, interpolate } from 'webodm/classes/gettext';
+import ErrorMessage from 'webui/components/ErrorMessage';
+import { _, interpolate } from 'webui/classes/gettext';
 import $ from 'jquery';
 
 export default class SLControls extends React.Component{

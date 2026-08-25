@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 
 from .classes import BootTestCase
 from .utils import start_simple_auth_server
-from webodm import settings
+from webui import settings
 
 class TestAuth(BootTestCase):
     def setUp(self):

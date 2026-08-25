@@ -48,7 +48,7 @@ from app.video import extract_subtitles, srt_file_for_video, extract_gps_from_sr
 from nodeodm import status_codes
 from nodeodm.models import ProcessingNode
 from pyodm.exceptions import NodeResponseError, NodeConnectionError, NodeServerError, OdmError
-from webodm import settings
+from webui import settings
 from app.classes.gcp import GCPFile
 from .project import Project
 from django.utils.translation import gettext_lazy as _, gettext

@@ -1,15 +1,15 @@
 import React from 'react';
-import FormDialog from 'webodm/components/FormDialog';
+import FormDialog from 'webui/components/FormDialog';
 import PropTypes from 'prop-types';
 import './ShareDialog.scss';
-import ErrorMessage from 'webodm/components/ErrorMessage';
+import ErrorMessage from 'webui/components/ErrorMessage';
 import CloudLogin from './CloudLogin';
-import { _, interpolate } from 'webodm/classes/gettext';
+import { _, interpolate } from 'webui/classes/gettext';
 import { getCloudToken } from './CloudTokenStore';
-import AssetDownloads from 'webodm/classes/AssetDownloads';
-import Utils from 'webodm/classes/Utils';
-import PluginsAPI from 'webodm/classes/plugins/API';
-import Animations from 'webodm/classes/Animations';
+import AssetDownloads from 'webui/classes/AssetDownloads';
+import Utils from 'webui/classes/Utils';
+import PluginsAPI from 'webui/classes/plugins/API';
+import Animations from 'webui/classes/Animations';
 import $ from 'jquery';
 
 class ShareDialog extends React.Component {

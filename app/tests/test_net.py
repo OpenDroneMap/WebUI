@@ -9,7 +9,7 @@ class TestNet(TestCase):
         pass
 
     def test_net_functions(self):
-        from webodm import settings
+        from webui import settings
 
         # DNS fallback turned off by default
         self.assertIsNone(settings.DNS_RESOLUTION_FALLBACK)
@@ -30,9 +30,9 @@ class TestNet(TestCase):
         self.assertFalse(net.patch_dns_resolution())
 
         # Should affect all requests library calls
-        r = requests.get("https://webodm.org")
+        r = requests.get("https://opendronemap.org")
         self.assertEqual(r.status_code, 200)
-        self.assertTrue('webodm.org' in net.dns_cache)
+        self.assertTrue('opendronemap.org' in net.dns_cache)
 
         settings.DNS_RESOLUTION_FALLBACK = None
         self.assertTrue(net.unpatch_dns_resolution())

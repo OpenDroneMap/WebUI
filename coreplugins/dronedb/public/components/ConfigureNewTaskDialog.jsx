@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { Component } from "react";
 import { Modal } from "react-bootstrap";
-import NewTaskPanel from "webodm/components/NewTaskPanel";
+import NewTaskPanel from "webui/components/NewTaskPanel";
 
 import "./ConfigureNewTaskDialog.scss";
 

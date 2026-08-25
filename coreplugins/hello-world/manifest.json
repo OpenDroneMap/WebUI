@@ -1,6 +1,6 @@
 {
 	"name": "Hello World",
-	"webodmMinVersion": "0.7.1",
+	"webuiMinVersion": "0.7.1",
 	"description": "An example plugin for development",
 	"version": "1.0.0",
 	"author": "Piero Toffanin",

@@ -12,7 +12,7 @@
     "url": "git+https://github.com/OpenDroneMap/WebUI.git"
   },
   "keywords": [
-    "webodm"
+    "webui"
   ],
   "author": "Piero Toffanin",
   "license": "AGPL-3.0",

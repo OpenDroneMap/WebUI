@@ -1,6 +1,6 @@
 import inspect
 from worker.celery import app
-from webodm import settings
+from webui import settings
 
 task = app.task
 

@@ -9,8 +9,8 @@ User=odm
 Group=odm
 WorkingDirectory=/opt/WebUI
 Environment=PATH=/home/odm/.local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=/bin/bash -c 'screen -dmS webodm /opt/WebUI/webodm.sh start'
-ExecStop=/bin/bash -c '/opt/WebUI/webodm.sh stop'
+ExecStart=/bin/bash -c 'screen -dmS webui /opt/WebUI/webui.sh start'
+ExecStop=/bin/bash -c '/opt/WebUI/webui.sh stop'
 Restart=on-failure
 
 [Install]

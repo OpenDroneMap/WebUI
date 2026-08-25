@@ -1,6 +1,6 @@
 {
 	"name": "Diagnostic",
-	"webodmMinVersion": "0.6.2",
+	"webuiMinVersion": "0.6.2",
 	"description": "Display program version, memory and disk space usage statistics",
 	"version": "1.0.0",
 	"author": "Piero Toffanin",

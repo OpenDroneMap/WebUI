@@ -1,9 +1,9 @@
 import React from 'react';
 import './Login.scss';
-import ErrorMessage from 'webodm/components/ErrorMessage';
+import ErrorMessage from 'webui/components/ErrorMessage';
 import PropTypes from 'prop-types';
 import $ from 'jquery';
-import { _ } from 'webodm/classes/gettext';
+import { _ } from 'webui/classes/gettext';
 
 export default class Login extends React.Component {
   static defaultProps = {

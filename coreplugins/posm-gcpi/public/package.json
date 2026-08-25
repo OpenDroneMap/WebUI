@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "webodm-posm-gcpi": "^1.0.0"
+    "webui-posm-gcpi": "^1.0.0"
   }
 }

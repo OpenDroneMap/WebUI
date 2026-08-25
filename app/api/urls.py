@@ -18,7 +18,7 @@ from .workers import CheckTask, GetTaskResult, CancelTask
 from .users import UsersList, UsersProfile
 from .groups import GroupsList
 from .externalauth import ExternalTokenAuth
-from webodm import settings
+from webui import settings
 
 router = routers.DefaultRouter()
 router.register(r'projects', ProjectViewSet)

@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django import forms
-from webodm import settings
+from webui import settings
 from django.http import JsonResponse
 from django.utils.translation import get_language
 import requests
@@ -58,12 +58,12 @@ def dev_tools(request, action):
                 if len(locale_paths) == 0:
                     raise Exception(_("Cannot find locale/ folder in .zip archive"))
                 
-                webodm_locale_dir = os.path.join(settings.BASE_DIR, "locale")
+                webui_locale_dir = os.path.join(settings.BASE_DIR, "locale")
 
                 for locale_path in locale_paths:
                     logger.info("Found locale at %s" % locale_path)
-                    logger.info("Moving %s to %s..." % (locale_path, webodm_locale_dir))
-                    copymerge(locale_path, webodm_locale_dir)
+                    logger.info("Moving %s to %s..." % (locale_path, webui_locale_dir))
+                    copymerge(locale_path, webui_locale_dir)
 
                 logger.info("Running python manage.py translate extract && python manage.py translate build --safe")
                 subprocess.call(['bash', '-c', 'python manage.py translate extract && %s python manage.py translate build --safe'], cwd=settings.BASE_DIR)

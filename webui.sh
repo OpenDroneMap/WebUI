@@ -373,7 +373,7 @@ environment_check(){
         if [ -z "$DOCKER_HOST" ]; then
             echo "DOCKER_HOST is unset"
             if [[ "$($docker_compose -v)" != "podman"* ]] && [[ "$DOCKER_VERSION" == "podman"* ]]; then
-                echo "You seem to be using podman with docker-compose instead of podman-compose. The above variable may need to be set, see https://docs.webodm.org/tutorials/using-podman/ for more information."
+                echo "You seem to be using podman with docker-compose instead of podman-compose. The above variable may need to be set, see https://docs.opendronemap.org/tutorials/using-podman/ for more information."
             fi
         else
             echo "DOCKER_HOST: $DOCKER_HOST"
@@ -434,7 +434,7 @@ start(){
 	# echo "Media directory is..."
 	# echo $WO_MEDIA_DIR
 	# mkdir -p $WO_MEDIA_DIR
-	# mkdir -p webodm/app/media/tmp
+	# mkdir -p webui/app/media/tmp
 
 	command="$docker_compose -f docker-compose.yml"
 
@@ -489,7 +489,7 @@ start(){
 
 		# Make sure we have a hostname
 		if [ "$WO_HOST" = "localhost" ]; then
-			echo -e "\033[91mSSL is enabled, but hostname cannot be set to $WO_HOST. Set the --hostname argument to the domain of your OpenDroneMap WebUI server (for example: www.mywebodm.org).\033[39m"
+			echo -e "\033[91mSSL is enabled, but hostname cannot be set to $WO_HOST. Set the --hostname argument to the domain of your OpenDroneMap WebUI server (for example: www.myopendronemap.org).\033[39m"
 			exit 1
 		fi
 
@@ -572,7 +572,7 @@ run_tests(){
     else
 		environment_check
         echo "Running tests in webapp container"
-        test_command="/webodm/webodm.sh test $*"
+        test_command="/webui/webui.sh test $*"
         run "$docker_compose exec webapp /bin/bash -c \"$test_command\""
     fi
 }

@@ -2,7 +2,7 @@ import L from 'leaflet';
 import ReactDOM from 'ReactDOM';
 import React from 'React';
 import PropTypes from 'prop-types';
-import { _ } from 'webodm/classes/gettext';
+import { _ } from 'webui/classes/gettext';
 import './Contours.scss';
 import ContoursPanel from './ContoursPanel';
 

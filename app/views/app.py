@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
 from django import forms
 from app.views.utils import get_permissions, get_project_or_raise, get_task_or_raise, handle_302, ResponseClusterRedirect, cluster_mode
-from webodm import settings
+from webui import settings
 
 def index(request):
     # Check first access

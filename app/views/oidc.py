@@ -12,7 +12,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.db.utils import IntegrityError
 
-from webodm import settings
+from webui import settings
 from django.http import Http404
 from django.db import transaction
 from app.oidc_providers import get_oidc_providers

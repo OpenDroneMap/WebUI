@@ -1,6 +1,6 @@
 {
 	"name": "Task Notification",
-	"webodmMinVersion": "0.6.2",
+	"webuiMinVersion": "0.6.2",
 	"description": "Get notified when a task has finished processing, has been removed or has failed",
 	"version": "0.1.0",
 	"author": "Ronald W. Machado",
