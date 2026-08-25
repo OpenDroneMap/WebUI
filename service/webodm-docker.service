@@ -7,10 +7,10 @@ After=docker.service
 Type=forking
 User=odm
 Group=odm
-WorkingDirectory=/opt/WebODM
+WorkingDirectory=/opt/WebUI
 Environment=PATH=/home/odm/.local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=/bin/bash -c 'screen -dmS webodm /opt/WebODM/webodm.sh start'
-ExecStop=/bin/bash -c '/opt/WebODM/webodm.sh stop'
+ExecStart=/bin/bash -c 'screen -dmS webodm /opt/WebUI/webodm.sh start'
+ExecStop=/bin/bash -c '/opt/WebUI/webodm.sh stop'
 Restart=on-failure
 
 [Install]
