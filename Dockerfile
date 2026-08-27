@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM python:3.12-alpine3.22 AS builder
-LABEL maintainer="OpenDroneMap Developers <pt@masseranolabs.com>"
+LABEL maintainer="OpenDroneMap Developers <maintainers@opendronemap.org>"
 
 # Build-time variables
 ARG WORKDIR=/webui
