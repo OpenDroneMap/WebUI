@@ -67,7 +67,7 @@ ALLOWED_HOSTS = ['*']
 
 # Branding
 APP_NAME = "WebUI"
-APP_DEFAULT_LOGO = os.path.join('app', 'static', 'app', 'img', 'logo512.png')
+APP_DEFAULT_LOGO = os.path.join('app', 'static', 'app', 'img', 'logo.svg')
 
 # In single user mode, a default admin account is created and automatically
 # used so that no login windows are displayed

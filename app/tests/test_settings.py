@@ -47,7 +47,7 @@ class TestSettings(BootTestCase):
         self.assertTrue(os.path.exists(default_logo_path), "Default logo exists in MEDIA_ROOT/settings")
 
         # We can update the logo
-        logo = os.path.join('app', 'static', 'app', 'img', 'favicon.png')
+        logo = os.path.join('app', 'static', 'app', 'img', 'favicon.svg')
         settings.app_logo.save(os.path.basename(logo), File(open(logo, 'rb')))
         settings.save()
 
