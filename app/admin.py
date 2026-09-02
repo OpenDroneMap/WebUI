@@ -96,12 +96,12 @@ class SettingAdmin(admin.ModelAdmin):
 
     @staticmethod
     def set_default_logo(obj):
-        default_logo_path = os.path.join(settings.BASE_DIR, 'app', 'static', 'app', 'img', 'logo.svg')
+        default_logo_path = os.path.join(settings.BASE_DIR, 'app', 'static', 'app', 'img', 'logo512.png')
         if not os.path.exists(default_logo_path):
             return False
 
         with open(default_logo_path, 'rb') as default_logo_file:
-            obj.app_logo.save('logo.svg', File(default_logo_file), save=False)
+            obj.app_logo.save('logo512.png', File(default_logo_file), save=False)
         return True
 
     def save_model(self, request, obj, form, change):

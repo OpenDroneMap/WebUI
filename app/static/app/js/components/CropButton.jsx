@@ -170,7 +170,7 @@ class CropButton extends React.Component {
 
             this.acceptMarker = L.marker(acceptLatlng, {
                 icon: L.icon({
-                iconUrl: `/static/app/img/accept.webp`,
+                iconUrl: `/static/app/img/accept.png`,
                 iconSize: [20, 20],
                 iconAnchor: [10, 10],
                 className: "crop-button-accept-button",
