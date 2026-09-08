@@ -200,7 +200,7 @@ export default class Dashboard extends React.Component {
 
                 <div className="buttons text-right">
                     <hr/>
-                    <button className="btn btn-sm btn-primary logout" onClick={this.handeLogout}>
+                    <button className="btn btn-sm btn-primary logout" onClick={this.handleLogout}>
                         <i className="fa fa-power-off"></i> {_("Logout")}
                     </button>
                 </div>
