@@ -1,5 +1,3 @@
-ALTER USER postgres PASSWORD 'postgres';
-
 -- Enable PostGIS extensions on template1 so all new databases inherit them
 \c template1
 
