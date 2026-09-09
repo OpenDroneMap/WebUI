@@ -1,4 +1,4 @@
-# GRASS Security Policy
+# OpenDroneMap Security Policy
 
 ## Reporting a Vulnerability
 
