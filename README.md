@@ -4,7 +4,7 @@
 
 A user-friendly, commercial grade software for drone image processing. Generate georeferenced maps, point clouds, elevation models and textured 3D models from aerial images. It supports multiple engines for processing, currently [ODM](https://github.com/OpenDroneMap/WebUI/ODM) and [MicMac](https://github.com/OpenDroneMap/NodeMICMAC/).
 
-![image](https://github.com/user-attachments/assets/aa1c4340-728d-46c3-a8e1-53bcb4851adc)
+![Screenshot of WebUI](https://github.com/user-attachments/assets/5cecdd41-62e9-4d44-a499-7ff27b42f44d)
 
 # Getting Started
  
