@@ -1,4 +1,4 @@
-<img alt="OpenDroneMap WebUI" src="https://user-images.githubusercontent.com/1951843/34074943-8f057c3c-e287-11e7-924d-3ccafa60c43a.png" width="180">
+<img alt="OpenDroneMap WebUI" src="https://github.com/user-attachments/assets/7b0d82b9-2041-409e-bd95-06cbc024ffc0">
 
 > **📢 OpenDroneMap has officially decoupled from WebODM!** [Read the announcement](https://opendronemap.org/blog/announcement/)
 
