@@ -52,4 +52,4 @@ vulnerability until we have had adequate time to provide a fix.
 
 Thank you for helping to keep OpenDroneMap secure!
 
-(Shamelessly adapted from GRASS Security)
+(Shamelessly adapted from [GRASS Security](https://github.com/OSGeo/grass/blob/main/SECURITY.md))
