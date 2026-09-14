@@ -10,6 +10,14 @@
     <div id="errorMessage"></div>
 </div>
 
+<!-- (2026/09/14 1:42pm) TEMPORARILY REMOVING LOCALISATION IN PREPARATION FOR LAUNCH -->
+<div id="notice">
+<p> Support for localisation has temporarily been removed from this version of OpenDroneMap WebUI.</p>
+<p> It will be back soon.</p>
+</div>
+
+<!-- (2026/09/14 1:42pm) TEMPORARILY REMOVING LOCALISATION 
+
 <form class="form-inline" style="margin-top: 32px;">
     <strong>{% trans 'Current Locale:' %}</strong> {{ current_locale }}<br/>
     <small>{% trans "To change locale, modify your browser's locale settings, then refresh the page, or use the set locale button below." %}</small>
@@ -29,6 +37,7 @@
         <button class="btn btn-primary" onclick="window.setLocale(document.getElementById('targetLocale').value);"><i class="fa fa-globe"></i> {% trans 'Apply' %}</button>
     </div>
 </form>
+-->
 <div id="action-loading" style="display: none; margin-top: 12px">
     <i class="fa fa-circle-notch fa-spin fa-fw"></i> {% trans 'Executing… do not refresh the page! This could take a while.' %}
 </div>
