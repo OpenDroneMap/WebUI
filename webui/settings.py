@@ -470,7 +470,7 @@ WORKERS_MAX_TIME_LIMIT = None
 AUTO_LOGIN_USER = None
 
 # Link to GCP docs
-GCP_DOCS_LINK = "https://docs.opendronemap.org/ground-control-points/#gcp-file-format"
+GCP_DOCS_LINK = "https://docs.opendronemap.org/gcp/"
 
 # Link to general docs
 DOCS_LINK = "https://docs.opendronemap.org"
