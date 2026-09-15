@@ -15,12 +15,12 @@ from app.models import Theme
 from app.plugins import init_plugins
 from nodeodm.models import ProcessingNode
 # noinspection PyUnresolvedReferencesapp/boot.py#L20
-from webodm.settings import MEDIA_ROOT
+from webui.settings import MEDIA_ROOT
 from . import signals
 import logging
 from .models import Task, Setting
-from webodm import settings
-from webodm.wsgi import booted
+from webui import settings
+from webui.wsgi import booted
 
 
 def boot():
@@ -31,7 +31,7 @@ def boot():
     booted.value = True
     logger = logging.getLogger('app.logger')
 
-    logger.info("Booting WebODM {}".format(settings.VERSION))
+    logger.info("Booting OpenDroneMap WebUI {}".format(settings.VERSION))
 
     if settings.DEBUG:
         logger.warning("Debug mode is ON (for development this is OK)")

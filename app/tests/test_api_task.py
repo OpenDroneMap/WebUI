@@ -39,7 +39,7 @@ from .utils import start_processing_node, clear_test_media_root, catch_signal
 # task processing happens on a separate thread, and normal TestCases
 # do not commit changes to the DB, so spawning a new thread will show no
 # data in it.
-from webodm import settings
+from webui import settings
 import subprocess
 logger = logging.getLogger('app.logger')
 

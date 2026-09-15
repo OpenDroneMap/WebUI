@@ -6,7 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 from worker.tasks import cleanup_tasks, cleanup_projects
 from .classes import BootTestCase
-from webodm import settings
+from webui import settings
 
 class TestCleanup(BootTestCase):
     def setUp(self):

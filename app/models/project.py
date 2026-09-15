@@ -18,7 +18,7 @@ from django.db import transaction
 from app import pending_actions
 
 from nodeodm import status_codes
-from webodm import settings as wo_settings
+from webui import settings as wo_settings
 
 logger = logging.getLogger('app.logger')
 

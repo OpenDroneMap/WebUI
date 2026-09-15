@@ -1,6 +1,6 @@
 from django import template
 from guardian.shortcuts import get_objects_for_user
-from webodm import settings
+from webui import settings
 
 from nodeodm.models import ProcessingNode
 

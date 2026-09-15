@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './MeasurePopup.scss';
-import Utils from 'webodm/classes/Utils';
-import Workers from 'webodm/classes/Workers';
-import { _, interpolate } from 'webodm/classes/gettext';
-import { systems, unitSystem, getUnitSystem } from 'webodm/classes/Units';
+import Utils from 'webui/classes/Utils';
+import Workers from 'webui/classes/Workers';
+import { _, interpolate } from 'webui/classes/gettext';
+import { systems, unitSystem, getUnitSystem } from 'webui/classes/Units';
 import $ from 'jquery';
 import L from 'leaflet';
 

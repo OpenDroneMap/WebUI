@@ -2,7 +2,7 @@ import os
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from app.models import Project
-from webodm import settings
+from webui import settings
 
 class Command(BaseCommand):
     requires_system_checks = []
@@ -19,7 +19,7 @@ class Command(BaseCommand):
     def handle(self, **options):
         if options.get('action') == 'mediapattern':
             print("# BorgBackup pattern file for media directory")
-            print("# Generated with WebODM")
+            print("# Generated with OpenDroneMap WebUI")
             print("")
 
             print("# Skip anything but project folder")

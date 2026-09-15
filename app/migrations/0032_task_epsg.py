@@ -4,7 +4,7 @@ from django.db import migrations, models
 import rasterio
 import os
 from app.pointcloud_utils import is_pointcloud_georeferenced
-from webodm import settings
+from webui import settings
 
 def update_epsg_fields(apps, schema_editor):
     Task = apps.get_model('app', 'Task')

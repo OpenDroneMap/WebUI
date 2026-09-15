@@ -8,7 +8,7 @@ from django.test import Client
 from app.contexts.settings import load as load_settings
 from app.models import Setting
 from app.models import Theme
-from webodm import settings as webodm_settings
+from webui import settings as webui_settings
 from .classes import BootTestCase
 
 class TestSettings(BootTestCase):
@@ -43,7 +43,7 @@ class TestSettings(BootTestCase):
         self.assertTrue(settings is not None, "Can retrieve settings")
 
         # The default logo has been created in the proper destination
-        default_logo_path = os.path.join(webodm_settings.MEDIA_ROOT, settings.app_logo.name)
+        default_logo_path = os.path.join(webui_settings.MEDIA_ROOT, settings.app_logo.name)
         self.assertTrue(os.path.exists(default_logo_path), "Default logo exists in MEDIA_ROOT/settings")
 
         # We can update the logo
@@ -53,7 +53,7 @@ class TestSettings(BootTestCase):
 
         # The main logo has been uploaded
         self.assertTrue("favicon" in settings.app_logo.name, "Logo has been updated")
-        self.assertTrue(os.path.exists(os.path.join(webodm_settings.MEDIA_ROOT, settings.app_logo.name)),
+        self.assertTrue(os.path.exists(os.path.join(webui_settings.MEDIA_ROOT, settings.app_logo.name)),
                         "New logo exists in MEDIA_ROOT/settings")
 
         # The old logo does not exist anymore

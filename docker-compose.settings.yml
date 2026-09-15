@@ -2,7 +2,7 @@ version: '2.1'
 services:
   webapp:
     volumes:
-      - ${WO_SETTINGS}:/webodm/webodm/settings_override.py
+      - ${WO_SETTINGS}:/webui/webui/settings_override.py
   worker:
     volumes:
-      - ${WO_SETTINGS}:/webodm/webodm/settings_override.py
+      - ${WO_SETTINGS}:/webui/webui/settings_override.py

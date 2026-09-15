@@ -1,5 +1,5 @@
 """
-WSGI config for webodm project.
+WSGI config for OpenDroneMap WebUI project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,7 +11,7 @@ import os
 from multiprocessing import Value
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webodm.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "webui.settings")
 
 application = get_wsgi_application()
 

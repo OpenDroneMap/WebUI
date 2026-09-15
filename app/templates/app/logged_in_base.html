@@ -40,7 +40,15 @@
                     {% endwith %}
                 {% endif %}
                 <li class="divider"></li>
-                <li><a href="/logout/"><i class="fa fa-sign-out-alt fa-fw"></i> {% trans 'Logout' %}</a>
+                <li>
+                <form class="info-item" method="post" action="/logout/" >
+                    {% csrf_token %}
+                    <button type="submit"><i class="fa fa-sign-out-alt fa-fw"></i>
+                    {% trans 'Logout' %}                    
+                     </button>
+                </form>
+
+                <!-- <a href="/logout/"><i class="fa fa-sign-out-alt fa-fw"></i> </a> -->
                 </li>
             </ul>
             <!-- /.dropdown-user -->
@@ -133,9 +141,11 @@
 
                 {% is_dev_mode as dev_mode %}
                 {% if dev_mode and user.is_superuser %}
-                <li>
-                    <a href="/dev-tools/"><i class="fa fa-bug fa-fw"></i> {% trans 'Developer Tools' %}</a>
-                </li>
+                
+                <!-- (2026/09/14 2:37pm) TEMPORARILY REMOVING ACCESS TO DEVELOPER TOOLS-->
+                <!-- <li> -->
+                    <!-- <a href="/dev-tools/"><i class="fa fa-bug fa-fw"></i> {% trans 'Developer Tools' %}</a> -->
+                <!-- </li> -->
                 {% endif %}
                 <li id="about-menu">
                     <a href="/about/"><i class="fa fa-info-circle fa-fw"></i> {% trans 'About' %}</a>

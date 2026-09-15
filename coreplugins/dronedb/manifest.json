@@ -1,13 +1,13 @@
 {
 	"name": "DroneDB",
-	"webodmMinVersion": "1.1.2",
-	"description": "Integrate WebODM with DroneDB: import images and share results",
+	"webuiMinVersion": "1.1.2",
+	"description": "Integrate OpenDroneMap WebUI with DroneDB: import images and share results",
 	"version": "0.0.2",
 	"author": "Luca Di Leo",
 	"email": "support@dronedb.app",
-	"repository": "https://github.com/WebODM/WebODM",
+	"repository": "https://github.com/OpenDroneMap/WebUI",
 	"tags": ["ddb", "DroneDB", "cloud"],
-	"homepage": "https://github.com/WebODM/WebODM",
+	"homepage": "https://github.com/OpenDroneMap/WebUI",
 	"experimental": true,
 	"deprecated": false
 }

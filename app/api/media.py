@@ -20,7 +20,7 @@ from app import models
 from app.api.tasks import flatten_files, TaskNestedView
 from .common import get_and_check_project, check_project_perms
 from app.security import path_traversal_check, sanitize_filename
-from webodm import settings
+from webui import settings
 
 MAX_MEDIA_FILE_SIZE = 128 * 1024 * 1024 * 1024  # 128 GB
 

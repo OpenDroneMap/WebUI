@@ -8,7 +8,7 @@ from guardian.models import UserObjectPermissionBase
 from guardian.shortcuts import get_objects_for_user
 from django.utils.translation import gettext_lazy as _
 
-from webodm import settings
+from webui import settings
 
 import json
 from pyodm import Node

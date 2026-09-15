@@ -1,13 +1,13 @@
 {
 	"name": "Diagnostic",
-	"webodmMinVersion": "0.6.2",
+	"webuiMinVersion": "0.6.2",
 	"description": "Display program version, memory and disk space usage statistics",
 	"version": "1.0.0",
 	"author": "Piero Toffanin",
 	"email": "pt@masseranolabs.com",
-	"repository": "https://github.com/WebODM/WebODM",
+	"repository": "https://github.com/OpenDroneMap/WebUI",
 	"tags": ["diagnostic"],
-	"homepage": "https://github.com/WebODM/WebODM",
+	"homepage": "https://github.com/OpenDroneMap/WebUI",
 	"experimental": false,
 	"deprecated": false
 }

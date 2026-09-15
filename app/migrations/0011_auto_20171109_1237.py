@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('app_name', models.CharField(help_text='The name of your application', max_length=255)),
                 ('app_logo', models.ImageField(help_text='A 512x512 logo of your application (.png or .jpeg)', upload_to='settings/')),
-                ('organization_name', models.CharField(blank=True, default='WebODM', help_text='The name of your organization', max_length=255, null=True)),
-                ('organization_website', models.URLField(blank=True, default='https://github.com/WebODM/WebODM/', help_text='The website URL of your organization', max_length=255, null=True)),
+                ('organization_name', models.CharField(blank=True, default='OpenDroneMap WebUI', help_text='The name of your organization', max_length=255, null=True)),
+                ('organization_website', models.URLField(blank=True, default='https://github.com/OpenDroneMap/WebUI/', help_text='The website URL of your organization', max_length=255, null=True)),
             ],
         ),
         migrations.CreateModel(

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ErrorMessage from 'webodm/components/ErrorMessage';
+import ErrorMessage from 'webui/components/ErrorMessage';
 import ShareDialog from './components/ShareDialog';
 import $ from 'jquery';
 

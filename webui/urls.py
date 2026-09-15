@@ -1,4 +1,4 @@
-"""webodm URL Configuration
+"""webui URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -24,13 +24,13 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-admin.site.site_header = 'WebODM Administration'
+admin.site.site_header = 'OpenDroneMap WebUI Administration'
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="WebODM API",
+      title="OpenDroneMap WebUI API",
       default_version='v1.0.0',
-      description="WebODM API",
+      description="OpenDroneMap WebUI API",
       #terms_of_service="",
       #contact=openapi.Contact(email=""),
    ),

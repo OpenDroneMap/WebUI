@@ -3,7 +3,7 @@ import math
 import logging
 import time
 from django import template
-from webodm import settings
+from webui import settings
 from django.utils.translation import gettext as _
 from app.oidc_providers import get_oidc_providers
 

@@ -48,7 +48,7 @@ if [ -e "letsencrypt/live/$DOMAIN" ]; then
 	ln -vs "../letsencrypt/live/$DOMAIN/privkey.pem" ssl/key.pem
 	ln -vs "../letsencrypt/live/$DOMAIN/fullchain.pem" ssl/cert.pem
 else
-	echo -e "\033[91mWARN: We couldn't automatically generate the SSL certificate. Review the console log. WebODM will likely be inaccessible.\033[39m"
+	echo -e "\033[91mWARN: We couldn't automatically generate the SSL certificate. Review the console log. OpenDroneMap WebUI will likely be inaccessible.\033[39m"
 fi
 
 # Restart nginx if necessary

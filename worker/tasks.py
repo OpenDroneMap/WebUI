@@ -17,7 +17,7 @@ from app.models import Project
 from app.models import Task
 from nodeodm import status_codes
 from nodeodm.models import ProcessingNode
-from webodm import settings
+from webui import settings
 import worker
 from .celery import app
 from app.raster_utils import export_raster as export_raster_sync, extension_for_export_format
@@ -141,7 +141,7 @@ def process_task(taskId):
                 return
             else:
                 # Expired
-                logger.warning("Task {} has an expired lock! This could mean that WebODM is running out of memory. Check your server configuration.".format(taskId))
+                logger.warning("Task {} has an expired lock! This could mean that OpenDroneMap WebUI is running out of memory. Check your server configuration.".format(taskId))
 
         # Set lock
         def update_lock():
@@ -158,7 +158,7 @@ def process_task(taskId):
             task.process()
         except Exception as e:
             logger.error(
-                "Uncaught error while processing task {}. This is potentially bad. Please report it to http://github.com/WebODM/WebODM/issues: {} {}".format(
+                "Uncaught error while processing task {}. This is potentially bad. Please report it to http://github.com/OpenDroneMap/WebUI/issues: {} {}".format(
                     taskId, e, traceback.format_exc()))
             if settings.TESTING: raise e
     finally:

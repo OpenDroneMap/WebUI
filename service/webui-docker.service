@@ -1,5 +1,5 @@
 [Unit]
-Description=Start WebODM Service Container
+Description=Start OpenDroneMap WebUI Service Container
 Requires=docker.service
 After=docker.service
 
@@ -7,10 +7,10 @@ After=docker.service
 Type=forking
 User=odm
 Group=odm
-WorkingDirectory=/opt/WebODM
+WorkingDirectory=/opt/WebUI
 Environment=PATH=/home/odm/.local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=/bin/bash -c 'screen -dmS webodm /opt/WebODM/webodm.sh start'
-ExecStop=/bin/bash -c '/opt/WebODM/webodm.sh stop'
+ExecStart=/bin/bash -c 'screen -dmS webui /opt/WebUI/webui.sh start'
+ExecStop=/bin/bash -c '/opt/WebUI/webui.sh stop'
 Restart=on-failure
 
 [Install]

@@ -7,7 +7,7 @@ import worker
 from app.models import Project
 from app.models import Task
 from nodeodm.models import ProcessingNode
-from webodm import settings
+from webui import settings
 from .classes import BootTestCase
 from .utils import start_processing_node
 from worker.tasks import redis_client
@@ -22,7 +22,7 @@ class TestWorker(BootTestCase):
         pass
 
     def test_redis(self):
-        # We can connect to redis. Other parts of the WebODM test suite
+        # We can connect to redis. Other parts of the OpenDroneMap WebUI test suite
         # rely on a valid redis connection.
         self.assertTrue(redis_client.ping())
 

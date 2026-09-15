@@ -1,10 +1,10 @@
 import React from 'react';
-import ErrorMessage from 'webodm/components/ErrorMessage';
+import ErrorMessage from 'webui/components/ErrorMessage';
 import PropTypes from 'prop-types';
 import './Dashboard.scss';
 import $ from 'jquery';
-import { _ } from 'webodm/classes/gettext';
-import Trans from 'webodm/components/Trans';
+import { _ } from 'webui/classes/gettext';
+import Trans from 'webui/components/Trans';
 
 export default class Dashboard extends React.Component {
   static defaultProps = {
@@ -58,7 +58,7 @@ export default class Dashboard extends React.Component {
         }else if (json.message === "Unauthorized"){
             this.props.onLogout();
         }else{
-            this.setState({ error: _('Cannot load lightning dashboard. Are you running the latest version of WebODM?') });
+            this.setState({ error: _('Cannot load lightning dashboard. Are you running the latest version of OpenDroneMap WebUI?') });
         }
     })
     .fail(() => {
@@ -200,7 +200,7 @@ export default class Dashboard extends React.Component {
 
                 <div className="buttons text-right">
                     <hr/>
-                    <button className="btn btn-sm btn-primary logout" onClick={this.handeLogout}>
+                    <button className="btn btn-sm btn-primary logout" onClick={this.handleLogout}>
                         <i className="fa fa-power-off"></i> {_("Logout")}
                     </button>
                 </div>

@@ -1,4 +1,4 @@
-from webodm import settings
+from webui import settings
 
 def get_oidc_providers():
     providers = []

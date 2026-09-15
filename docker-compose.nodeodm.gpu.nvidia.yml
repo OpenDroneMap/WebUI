@@ -1,6 +1,6 @@
 # Chaining this file to the main docker-compose file adds
 # a default processing node instance. This is best for users
-# who are just getting started with WebODM.
+# who are just getting started with OpenDroneMap WebUI.
 
 version: '2.1'
 services:
@@ -10,7 +10,7 @@ services:
     environment:
       - WO_DEFAULT_NODES
   node-odm-1:
-    image: webodm/nodeodm:gpu
+    image: opendronemap/nodeodm:stable
     container_name: node-odm-1
     expose:
       - "3000"

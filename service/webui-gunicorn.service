@@ -1,0 +1,17 @@
+[Unit]
+Description=Start OpenDroneMap WebUI Gunicorn Service Container
+Requires=webui-nginx.service postgresql.service redis.service
+After=webui-nginx.service postgresql.service redis.service
+
+[Service]
+Type=simple
+User=odm
+Group=odm
+PIDFile=/run/webui-gunicorn.pid
+WorkingDirectory=/webui
+ExecStart=/webui/python3-venv/bin/gunicorn webui.wsgi --bind unix:/webui/gunicorn.sock --timeout 300000 --max-requests 250 --preload
+ExecStop=/bin/kill -s QUIT $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

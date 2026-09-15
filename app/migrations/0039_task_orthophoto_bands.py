@@ -4,7 +4,7 @@ import rasterio
 import os
 import django.contrib.postgres.fields.jsonb
 from django.db import migrations
-from webodm import settings
+from webui import settings
 
 def update_orthophoto_bands_fields(apps, schema_editor):
     Task = apps.get_model('app', 'Task')

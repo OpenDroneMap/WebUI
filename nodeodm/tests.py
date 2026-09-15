@@ -10,7 +10,7 @@ from os import path
 
 from pyodm import Node
 from pyodm.exceptions import NodeConnectionError, NodeServerError, NodeResponseError
-from webodm import settings
+from webui import settings
 from app.tests.utils import start_processing_node
 from .models import ProcessingNode
 from . import status_codes

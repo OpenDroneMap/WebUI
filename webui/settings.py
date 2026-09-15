@@ -1,5 +1,5 @@
 """
-Django settings for webodm project.
+Django settings for OpenDroneMap WebUI project.
 
 Updated for Django 5.2 LTS
 
@@ -61,12 +61,16 @@ DEBUG = os.environ.get('WO_DEBUG', 'YES') == 'YES' or TESTING
 DEV = os.environ.get('WO_DEV', 'NO') == 'YES' and not TESTING
 DEV_WATCH_PLUGINS = DEV and os.environ.get('WO_DEV_WATCH_PLUGINS', 'NO') == 'YES'
 SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = os.environ.get('WO_SSL', 'NO') == 'YES'
+CSRF_TRUSTED_ORIGINS = [
+    "https://" + str(os.environ.get("WO_HOST")),
+    "http://" + str(os.environ.get("WO_HOST")),
+]
 INTERNAL_IPS = ['127.0.0.1']
 
 ALLOWED_HOSTS = ['*']
 
 # Branding
-APP_NAME = "WebODM"
+APP_NAME = "WebUI"
 APP_DEFAULT_LOGO = os.path.join('app', 'static', 'app', 'img', 'logo512.png')
 
 # In single user mode, a default admin account is created and automatically
@@ -142,9 +146,9 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
 ]
 
-ROOT_URLCONF = 'webodm.urls'
+ROOT_URLCONF = 'webui.urls'
 
-WSGI_APPLICATION = 'webodm.wsgi.application'
+WSGI_APPLICATION = 'webui.wsgi.application'
 
 
 # Database
@@ -153,7 +157,7 @@ WSGI_APPLICATION = 'webodm.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('WO_DATABASE_ENGINE', 'django.contrib.gis.db.backends.postgis'),
-        'NAME': os.environ.get('WO_DATABASE_NAME', 'webodm_dev'),
+        'NAME': os.environ.get('WO_DATABASE_NAME', 'webui_dev'),
         'USER': os.environ.get('WO_DATABASE_USER', 'postgres'),
         'PASSWORD': os.environ.get('WO_DATABASE_PASSWORD', 'postgres'),
         'HOST': os.environ.get('WO_DATABASE_HOST', 'db'),
@@ -466,10 +470,10 @@ WORKERS_MAX_TIME_LIMIT = None
 AUTO_LOGIN_USER = None
 
 # Link to GCP docs
-GCP_DOCS_LINK = "https://docs.webodm.org/ground-control-points/#gcp-file-format"
+GCP_DOCS_LINK = "https://docs.opendronemap.org/ground-control-points/#gcp-file-format"
 
 # Link to general docs
-DOCS_LINK = "https://docs.webodm.org"
+DOCS_LINK = "https://docs.opendronemap.org"
 
 # Link to task options docs
 TASK_OPTIONS_DOCS_LINK = ""

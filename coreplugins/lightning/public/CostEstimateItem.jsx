@@ -1,9 +1,9 @@
 import React from 'react';
 import './CostEstimateItem.scss';
-import ResizeModes from 'webodm/classes/ResizeModes';
+import ResizeModes from 'webui/classes/ResizeModes';
 import PropTypes from 'prop-types';
 import $ from 'jquery';
-import { _ } from 'webodm/classes/gettext';
+import { _ } from 'webui/classes/gettext';
 
 export default class CostEstimateItem extends React.Component {
   static defaultProps = {

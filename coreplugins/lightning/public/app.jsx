@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Login from './Login';
 import Dashboard from './Dashboard';
-import { _ } from 'webodm/classes/gettext';
-import Trans from 'webodm/components/Trans';
+import { _ } from 'webui/classes/gettext';
+import Trans from 'webui/components/Trans';
 
 export default class LightningPanel extends React.Component {
   static defaultProps = {

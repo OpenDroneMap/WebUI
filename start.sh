@@ -2,14 +2,22 @@
 __dirname=$(cd $(dirname "$0"); pwd -P)
 cd ${__dirname}
 
-echo -e "\033[92m"      
-echo " _       __     __    ____  ____  __  ___"
-echo "| |     / /__  / /_  / __ \/ __ \/  |/  /"
-echo "| | /| / / _ \/ __ \/ / / / / / / /|_/ / "
-echo "| |/ |/ /  __/ /_/ / /_/ / /_/ / /  / /  "
-echo "|__/|__/\___/_.___/\____/_____/_/  /_/   "
-echo                          
-echo -e "\033[39m"
+echo -e " _____                 ______                     ___  ___            "
+echo -e "|  _  |                |  _  \                    |  \/  |            "
+echo -e "| | | |_ __   ___ _ __ | | | |_ __ ___  _ __   ___| .  . | __ _ _ __  "
+echo -e "| | | | '_ \ / _ \ '_ \| | | | '__/ _ \| '_ \ / _ \ |\/| |/ _\` | '_ \ "
+echo -e "\ \_/ / |_) |  __/ | | | |/ /| | | (_) | | | |  __/ |  | | (_| | |_) |"
+echo -e " \___/| .__/ \___|_| |_|___/ |_|  \___/|_| |_|\___\_|  |_/\__,_| .__/ "
+echo -e "      | |                                                      | |    "
+echo -e "      |_|                                                      |_|    "
+echo -e "                      _    _      _     _   _ _____                   "
+echo -e "                     | |  | |    | |   | | | |_   _|                  "
+echo -e "                     | |  | | ___| |__ | | | | | |                    "
+echo -e "                     | |/\| |/ _ \ '_ \| | | | | |                    "
+echo -e "                     \  /\  /  __/ |_) | |_| |_| |_                   "
+echo -e "                      \/  \/ \___|_.__/ \___/ \___/                   "
+echo -e "                                                                      "
+echo -e "                                                                      "
 
 almost_there(){
     echo 
@@ -47,7 +55,7 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ]; then
     cd nodeodm/external/NodeODM
     npm install
 
-    cd /webodm
+    cd /webui
 
     echo Setup pip requirements...
     pip install -r requirements.txt
@@ -60,8 +68,8 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ]; then
 fi
 
 
-mkdir -p /webodm/app/media/tmp
-mkdir -p /webodm/app/media_test/tmp
+mkdir -p /webui/app/media/tmp
+mkdir -p /webui/app/media_test/tmp
  
 echo Running migrations
 python manage.py migrate
@@ -99,14 +107,14 @@ congrats(){
         echo "Congratulations! └@(･◡･)@┐"
         echo ==========================
         echo -e "\033[39m"
-        echo "If there are no errors, WebODM should be up and running!"
+        echo "If there are no errors, OpenDroneMap WebUI should be up and running!"
     else    
         echo -e "\033[93m"
         echo "Something doesn't look right! ¯\_(ツ)_/¯"
         echo "The server returned a status code of $status when we tried to reach it."
         echo ==========================
         echo -e "\033[39m"
-        echo "Check if WebODM is running, maybe we tried to reach it too soon."
+        echo "Check if OpenDroneMap WebUI is running, maybe we tried to reach it too soon."
     fi
 
     echo -e "\033[93m"
@@ -118,8 +126,8 @@ if [ "$1" = "--setup-devenv" ] || [ "$2" = "--setup-devenv" ] || [ "$1" = "--no-
     congrats
     python manage.py runserver 0.0.0.0:8000
 else
-    if [ -e /webodm ] && [ ! -e /webodm/build/static ]; then
-       echo -e "\033[91mWARN:\033[39m /webodm/build/static does not exist, CSS, JS and other files might not be available."
+    if [ -e /webui ] && [ ! -e /webui/build/static ]; then
+       echo -e "\033[91mWARN:\033[39m /webui/build/static does not exist, CSS, JS and other files might not be available."
     fi
 
     echo "Generating nginx configurations from templates..."
@@ -152,7 +160,7 @@ else
     congrats
 
     nginx -c $(pwd)/nginx/$conf
-    gunicorn webodm.wsgi --bind unix:/tmp/gunicorn.sock --timeout 300000 --max-requests 5000 --workers $WEB_CONCURRENCY --preload
+    gunicorn webui.wsgi --bind unix:/tmp/gunicorn.sock --timeout 300000 --max-requests 5000 --workers $WEB_CONCURRENCY --preload
 fi
 
 # If this is executed, it means the previous command failed, don't display the congratulations message

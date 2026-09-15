@@ -11,7 +11,7 @@ from contextlib import contextmanager
 
 import random
 
-from webodm import settings
+from webui import settings
 
 logger = logging.getLogger('app.logger')
 

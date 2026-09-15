@@ -11,7 +11,7 @@ if (!Object.values) {
   values.shim();
 }
 
-// Do not apply to WebODM, can cause confusion
+// Do not apply to OpenDroneMap WebUI, can cause confusion
 const OPTS_BLACKLIST = [
   "build-overviews",
   "orthophoto-no-tiled",

@@ -15,7 +15,7 @@ from django.views.decorators.http import require_POST
 from nodeodm.models import ProcessingNode
 from app.api.processingnodes import ProcessingNodeSerializer
 from .api import GetTaskSize, ShareTask
-from webodm import settings
+from webui import settings
 
 API_BASE = "http://192.168.2.253:5000" if (settings.DEV or settings.TESTING) else "https://webodm.net"
 ds = GlobalDataStore('lightning')

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from nodeodm.models import ProcessingNode
-from webodm import settings
+from webui import settings
 
 class ProcessingNodeSerializer(serializers.ModelSerializer):
     online = serializers.SerializerMethodField()

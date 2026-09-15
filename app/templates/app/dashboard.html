@@ -5,7 +5,7 @@
 {% block content %}
 	<!--[if lte IE 8]>
 		<div class="alert alert-warning alert-dismissible">
-            WebODM cannot be used with this version of Internet Explorer. Could you please upgrade <a href="https://www.microsoft.com/en-us/download/internet-explorer.aspx">Internet Explorer</a> to the latest version or use <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>?
+            OpenDroneMap WebUI cannot be used with this version of Internet Explorer. Could you please upgrade <a href="https://www.microsoft.com/en-us/download/internet-explorer.aspx">Internet Explorer</a> to the latest version or use <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>?
         </div>
 	<![endif]-->
 
@@ -14,7 +14,7 @@
 
 		<h3>{% trans 'Welcome!' %} ☺</h3>
 		{% trans 'Add a Processing Node' as add_processing_node %}
-		{% with nodeodm_link='<a href="https://github.com/WebODM/NodeODM" target="_blank">NodeODM</a>' api_link='<a href="https://github.com/WebODM/NodeODM/blob/master/docs/index.adoc" target="_blank">API</a>' %}
+		{% with nodeodm_link='<a href="https://github.com/OpenDroneMap/NodeODM" target="_blank">NodeODM</a>' api_link='<a href="https://github.com/OpenDroneMap/NodeODM/blob/master/docs/index.adoc" target="_blank">API</a>' %}
 			<p>
 			{% blocktrans %}To get started, "{{ add_processing_node }}". A processing node is a computer running an instance of {{ nodeodm_link }} or some other software implementing this {{ api_link }}.{% endblocktrans %}
 			</p>

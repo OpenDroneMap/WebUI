@@ -121,7 +121,7 @@ class EditTaskForm extends React.Component {
           // No nodes with options?
           const noProcessingNodesError = (nodes) => {
             var extra = nodes ? _("We tried to reach:") + "<ul>" + nodes.map(n => Utils.html`<li><a href="${n.url}">${n.label}</a></li>`).join("") + "</ul>" : "";
-            this.setState({error: _("There are no usable processing nodes.") + extra + _("Make sure that at least one processing node is reachable and that you have granted the current user sufficient permissions to view the processing node (by going to Administration -- Processing Nodes -- Select Node -- Object Permissions -- Add User/Group and check CAN VIEW PROCESSING NODE). If you are bringing a node back online, it will take about 30 seconds for WebODM to recognize it.")});
+            this.setState({error: _("There are no usable processing nodes.") + extra + _("Make sure that at least one processing node is reachable and that you have granted the current user sufficient permissions to view the processing node (by going to Administration -- Processing Nodes -- Select Node -- Object Permissions -- Add User/Group and check CAN VIEW PROCESSING NODE). If you are bringing a node back online, it will take about 30 seconds for OpenDroneMap WebUI to recognize it.")});
           };
 
           if (json.length === 0){

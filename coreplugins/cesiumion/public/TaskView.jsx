@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 
-import ErrorMessage from "webodm/components/ErrorMessage";
+import ErrorMessage from "webui/components/ErrorMessage";
 
 import IonAssetButton from "./components/IonAssetButton";
 import UploadDialog from "./components/UploadDialog";

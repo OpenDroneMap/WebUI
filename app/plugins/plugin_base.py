@@ -61,7 +61,7 @@ class PluginBase(ABC):
         """
         Should be overriden by plugins to perform persistent setup and configuration
         (e.g., registering static files, initializing databse entries, or hooking
-        into WebODM’s functionality). Called once, each time a plugin is enabled. If
+        into OpenDroneMap WebUI’s functionality). Called once, each time a plugin is enabled. If
         this method throws an exception, it will not be enabled by the system.
         :return: none
         """
@@ -164,7 +164,7 @@ class PluginBase(ABC):
     def include_js_files(self):
         """
         Should be overriden by plugins to communicate
-        which JS files should be included in the WebODM interface
+        which JS files should be included in the OpenDroneMap WebUI interface
         All paths are relative to a plugin's /public folder.
         """
         return []
@@ -172,7 +172,7 @@ class PluginBase(ABC):
     def include_css_files(self):
         """
         Should be overriden by plugins to communicate
-        which CSS files should be included in the WebODM interface
+        which CSS files should be included in the OpenDroneMap WebUI interface
         All paths are relative to a plugin's /public folder.
         """
         return []
@@ -207,7 +207,7 @@ class PluginBase(ABC):
         add routes to the root view controller.
         CAUTION: this should be used sparingly, as
         routes could conflict with other plugins and
-        future versions of WebODM might break the routes.
+        future versions of OpenDroneMap WebUI might break the routes.
         It's recommended to use app_mount_points, unless
         you know what you are doing.
         :return: [] of MountPoint objects

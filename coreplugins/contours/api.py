@@ -17,7 +17,7 @@ def calc_contours(dem, epsg, interval, output_format, simplify, zfactor = 1, cro
     import glob
     import json
     import re
-    from webodm import settings
+    from webui import settings
     from django.contrib.gis.geos import GEOSGeometry
     from app.geoutils import get_rasterio_to_meters_factor
     

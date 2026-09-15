@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import PropTypes from 'prop-types';
 
-import ResizeModes from 'webodm/classes/ResizeModes';
+import ResizeModes from 'webui/classes/ResizeModes';
 import SelectUrlDialog from "./components/SelectUrlDialog";
 import ErrorDialog from "./components/ErrorDialog";
 import ConfigureNewTaskDialog from "./components/ConfigureNewTaskDialog";

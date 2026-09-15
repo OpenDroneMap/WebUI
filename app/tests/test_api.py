@@ -14,7 +14,7 @@ from app.tests.utils import catch_signal
 from nodeodm import status_codes
 from nodeodm.models import ProcessingNode
 from .classes import BootTestCase
-from webodm import settings
+from webui import settings
 
 
 class TestApi(BootTestCase):

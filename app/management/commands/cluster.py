@@ -5,7 +5,7 @@ import shutil
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from app.models import Project, Task, Preset, PluginDatum, Redirect
-from webodm import settings
+from webui import settings
 from django.db import connection
 from django.contrib.auth.models import User
 from django.core import serializers

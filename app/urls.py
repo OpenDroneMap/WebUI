@@ -5,7 +5,7 @@ from .views import app as app_views, public as public_views, dev as dev_views, o
 from .plugins.views import app_view_handler, root_url_patterns
 
 from app.boot import boot
-from webodm import settings
+from webui import settings
 from app.plugins import sync_plugin_db
 
 # Test cases call boot() independently

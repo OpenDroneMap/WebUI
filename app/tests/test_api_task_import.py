@@ -18,7 +18,7 @@ from app.tests.classes import BootTransactionTestCase
 from app.tests.utils import clear_test_media_root, start_processing_node
 from nodeodm import status_codes
 from nodeodm.models import ProcessingNode
-from webodm import settings
+from webui import settings
 
 
 class TestApiTask(BootTransactionTestCase):

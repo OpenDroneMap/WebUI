@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-echo "devenv.sh is deprecated! Use \"./webodm.sh start --dev\" instead."
+echo "devenv.sh is deprecated! Use \"./webui.sh start --dev\" instead."

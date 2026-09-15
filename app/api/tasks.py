@@ -38,7 +38,7 @@ from app.security import path_traversal_check
 from django.utils.translation import gettext_lazy as _
 from .fields import PolygonGeometryField
 from app.geoutils import geom_transform_wkt_bbox, get_srs_name_units_from_epsg_or_wkt
-from webodm import settings
+from webui import settings
 
 def flatten_files(request_files):
     # MultiValueDict in, flat array of files out

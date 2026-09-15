@@ -175,7 +175,7 @@ class EditPermissionsPanel extends React.Component {
   }
 
   simplifiedPermission = perms => {
-      // We simplify WebODM's internal permission model into
+      // We simplify OpenDroneMap WebUI's internal permission model into
       // a simpler read or read/write model.
       if (perms.indexOf("change") !== -1) return "rw";
       else if (perms.indexOf("view") !== -1) return "r";

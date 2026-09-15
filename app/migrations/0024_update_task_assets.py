@@ -6,7 +6,7 @@ import django.contrib.postgres.fields
 import os
 from django.db import migrations, models
 
-from webodm import settings
+from webui import settings
 
 ASSETS_MAP = {
     'all.zip': 'all.zip',

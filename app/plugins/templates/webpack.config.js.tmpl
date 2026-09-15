@@ -1,8 +1,8 @@
-// Magic to include node_modules of root WebODM's directory
+// Magic to include node_modules of root OpenDroneMap WebUI's directory
 const fs = require('fs');
-let webodmRoot = "../../../"; // Assuming plugins/<name>/public
-if (!fs.existsSync(webodmRoot + "webodm.sh")) webodmRoot = "../../../../../"; // Assuming app/media/plugins/<name>/public
-process.env.NODE_PATH = webodmRoot + "node_modules";
+let webuiRoot = "../../../"; // Assuming plugins/<name>/public
+if (!fs.existsSync(webuiRoot + "webui.sh")) webuiRoot = "../../../../../"; // Assuming app/media/plugins/<name>/public
+process.env.NODE_PATH = webuiRoot + "node_modules";
 require("module").Module._initPaths();
 
 let path = require("path");
@@ -72,7 +72,7 @@ module.exports = {
     modules: ['node_modules', 'bower_components'],
     extensions: ['.js', '.jsx'],
     alias: {
-        webodm: path.resolve(__dirname, webodmRoot + 'app/static/app/js')
+        webui: path.resolve(__dirname, webuiRoot + 'app/static/app/js')
     }
   },
 

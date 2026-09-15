@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.http import Http404, HttpResponseRedirect
 from app.models import Project, Task, Redirect
-from webodm import settings
+from webui import settings
 from functools import wraps
 
 def get_permissions(user, project):

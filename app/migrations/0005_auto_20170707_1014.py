@@ -7,7 +7,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.db import migrations
 import os
 
-from webodm import settings
+from webui import settings
 
 
 def assets_path(project_id, task_id, *args):

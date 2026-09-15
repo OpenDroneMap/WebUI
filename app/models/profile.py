@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from app.models import Task
 from django.db.models import Sum
 from django.core.cache import cache
-from webodm import settings
+from webui import settings
 
 
 class Profile(models.Model):

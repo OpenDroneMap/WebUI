@@ -7,7 +7,7 @@ import re
 import subprocess
 from pipes import quote
 from rio_tiler.utils import has_alpha_band
-from webodm import settings
+from webui import settings
 
 logger = logging.getLogger('app.logger')
 

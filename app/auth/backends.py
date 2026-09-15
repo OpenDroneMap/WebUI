@@ -2,7 +2,7 @@ import requests
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 from nodeodm.models import ProcessingNode
-from webodm import settings
+from webui import settings
 from guardian.shortcuts import assign_perm
 import logging
 

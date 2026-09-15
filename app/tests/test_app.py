@@ -7,7 +7,7 @@ from nodeodm.models import ProcessingNode
 from app.models import Project, Task
 from app.models import Setting
 from app.models import Theme
-from webodm import settings
+from webui import settings
 from .classes import BootTestCase
 from django.core.exceptions import ValidationError
 

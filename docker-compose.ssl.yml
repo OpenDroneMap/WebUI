@@ -8,7 +8,7 @@ services:
     ports:
       - "${WO_SSL_INSECURE_PORT_REDIRECT}:8080"
     volumes:
-      - letsencrypt:/webodm/nginx/letsencrypt
+      - letsencrypt:/webui/nginx/letsencrypt
     environment:
       - WO_SSL
       - WO_SSL_KEY

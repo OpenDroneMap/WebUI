@@ -26,7 +26,7 @@ from app.plugins import get_plugin_by_name, enable_plugin, disable_plugin, delet
 from .models import Project, Task, Setting, Theme
 from django import forms
 from codemirror2.widgets import CodeMirrorEditor
-from webodm import settings
+from webui import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.translation import gettext_lazy as _, gettext
 
@@ -265,7 +265,7 @@ class PluginAdmin(admin.ModelAdmin):
         try:
             p = enable_plugin(plugin_name)
             if p.requires_restart():
-                messages.warning(request, _("Restart required. Please restart WebODM to enable %(plugin)s") % {
+                messages.warning(request, _("Restart required. Please restart OpenDroneMap WebUI to enable %(plugin)s") % {
                     'plugin': plugin_name})
         except Exception as e:
             messages.warning(request, _("Cannot enable plugin %(plugin)s: %(message)s") % {'plugin': plugin_name,
@@ -277,7 +277,7 @@ class PluginAdmin(admin.ModelAdmin):
         try:
             p = disable_plugin(plugin_name)
             if p.requires_restart():
-                messages.warning(request, _("Restart required. Please restart WebODM to fully disable %(plugin)s") % {
+                messages.warning(request, _("Restart required. Please restart OpenDroneMap WebUI to fully disable %(plugin)s") % {
                     'plugin': plugin_name})
         except Exception as e:
             messages.warning(request, _("Cannot disable plugin %(plugin)s: %(message)s") % {'plugin': plugin_name,

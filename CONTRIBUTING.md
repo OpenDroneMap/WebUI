@@ -1,23 +1,23 @@
-# Contributing to WebODM
+# Contributing to OpenDroneMap
 
 :tada: First off, thanks for taking the time to contribute! :tada:
 
 ## How can I contribute?
 
-Contributors are expected to follow the [Collective Code Construction Contract (C4)](https://github.com/WebODM/WebODM/blob/master/CODE_OF_CONDUCT.md).
+Contributors are expected to follow the [collective code construction contract](https://github.com/OpenDroneMap/documents/blob/master/C4.md). You should read the document before making a pull request.
 
-Come hang out on the #devtalk channel on Discord if you have any questions. https://webodm.org/community
+Take a look at the list of open issues marked as `Help wanted` or `Good first issue` to find out how you can help.
 
 ## Code of Conduct
 
-You must adheres to the [Contributor Code of Conduct](https://github.com/WebODM/WebODM/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+You must adheres to the [Contributor Covenant](https://github.com/OpenDroneMap/documents/blob/master/CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
 
 ## Use of AI
 
-Responsible use of AI tools to increase productivity and facilitate contributions is generally allowed, as long as contributions are carefully reviewed and tested by the contributor, that no copyright is being infringed and that each submission is submitted manually with a human written description of the changes. 
-
-Be prepared to answer any questions about the logic from your changes.
+Use of AI tools to increase productivity and facilitate contributions is generally discouraged. Prompt driven pull requests are not allowed. Limited, responsible assistive use may be acceptable but requires disclosure and discussion.
 
 ## Scope
 
-This contributing document shall apply to all WebODM projects, unless a project defines its own separate contributing document.
+This contributing document shall apply to all OpenDroneMap projects, unless a project defines its own separate contributing document.
+
+

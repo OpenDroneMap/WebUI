@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from app.models import Task, Project, Redirect
 from .classes import BootTestCase
-from webodm import settings
+from webui import settings
 from django.core.management import call_command
 import worker
 

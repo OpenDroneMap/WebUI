@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 
-from webodm import settings
+from webui import settings
 
 logger = logging.getLogger('app.logger')
 

@@ -11,7 +11,7 @@ def detect(orthophoto, model, classes=None, crop=None, progress_callback=None):
     import subprocess
     import shutil
     import tempfile
-    from webodm import settings
+    from webui import settings
     from django.contrib.gis.geos import GEOSGeometry
 
     try:

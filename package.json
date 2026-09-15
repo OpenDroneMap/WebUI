@@ -1,5 +1,5 @@
 {
-  "name": "WebODM",
+  "name": "OpenDroneMap WebUI",
   "version": "3.2.5",
   "description": "User-friendly, commercial-grade software for processing aerial imagery.",
   "main": "index.js",
@@ -9,17 +9,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/WebODM/WebODM.git"
+    "url": "git+https://github.com/OpenDroneMap/WebUI.git"
   },
   "keywords": [
-    "webodm"
+    "webui"
   ],
-  "author": "Piero Toffanin",
+  "author": "OpenDroneMap Developers",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/WebODM/WebODM/issues"
+    "url": "https://github.com/OpenDroneMap/WebUI/issues"
   },
-  "homepage": "https://github.com/WebODM/WebODM#readme",
+  "homepage": "https://github.com/OpenDroneMap/WebUI#readme",
   "dependencies": {
     "@babel/core": "^7.0.0-beta.54",
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.54",

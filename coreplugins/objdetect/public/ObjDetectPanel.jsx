@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Storage from 'webodm/classes/Storage';
+import Storage from 'webui/classes/Storage';
 import L from 'leaflet';
 import './ObjDetectPanel.scss';
-import ErrorMessage from 'webodm/components/ErrorMessage';
-import Workers from 'webodm/classes/Workers';
-import Utils from 'webodm/classes/Utils';
-import { _ } from 'webodm/classes/gettext';
+import ErrorMessage from 'webui/components/ErrorMessage';
+import Workers from 'webui/classes/Workers';
+import Utils from 'webui/classes/Utils';
+import { _ } from 'webui/classes/gettext';
 
 export default class ObjDetectPanel extends React.Component {
   static defaultProps = {

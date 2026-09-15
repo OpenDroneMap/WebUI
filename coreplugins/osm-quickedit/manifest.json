@@ -1,13 +1,13 @@
 {
 	"name": "OSM Quick Editor Button",
-	"webodmMinVersion": "0.5.2",
+	"webuiMinVersion": "0.5.2",
 	"description": "A plugin to add a button for quickly opening OpenStreetMap's iD editor and setup a TMS basemap.",
 	"version": "1.0.0",
 	"author": "Dan Joseph, Piero Toffanin",
 	"email": "pt@masseranolabs.com",
-	"repository": "https://github.com/WebODM/WebODM",
+	"repository": "https://github.com/OpenDroneMap/WebUI",
 	"tags": ["osm", "editor", "josm"],
-	"homepage": "https://github.com/WebODM/WebODM",
+	"homepage": "https://github.com/OpenDroneMap/WebUI",
 	"experimental": true,
 	"deprecated": false
 }

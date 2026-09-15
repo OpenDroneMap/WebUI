@@ -4,7 +4,7 @@ authors:
 - family-names: "Toffanin"
   given-names: "Piero"
   orcid: "https://orcid.org/0000-0001-9450-993X"
-- name: "WebODM Contributors"
-title: "WebODM: User-friendly, commercial-grade software for processing aerial imagery."
+- name: "OpenDroneMap WebUI Contributors"
+title: "OpenDroneMap WebUI: User-friendly, commercial-grade software for processing aerial imagery."
 doi: 10.5281/zenodo.3965771
-url: "https://github.com/WebODM/WebODM"
+url: "https://github.com/OpenDroneMap/WebUI"
