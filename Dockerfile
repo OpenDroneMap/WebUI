@@ -177,7 +177,7 @@ RUN <<EOT
     # Django setup
     python manage.py collectstatic --noinput
     python manage.py rebuildplugins
-    python manage.py translate build --safe
+#    python manage.py translate build --safe
 
     # Remove auto-generated secret key
     rm -f /webui/webui/secret_key.py
