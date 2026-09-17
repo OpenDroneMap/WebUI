@@ -6,6 +6,7 @@ import struct
 import zlib
 import tempfile
 from datetime import datetime
+from datetime import timezone as tz
 import uuid as uuid_module
 from zipstream.ng import ZipStream
 
@@ -511,7 +512,7 @@ class Task(models.Model):
                 'name': self.name,
                 'processing_time': self.processing_time,
                 'options': self.options,
-                'created_at': self.created_at.astimezone(timezone.utc).timestamp(),
+                'created_at': self.created_at.astimezone(tz.utc).timestamp(),
                 'public': self.public,
                 'resize_to': self.resize_to,
                 'potree_scene': self.potree_scene,
