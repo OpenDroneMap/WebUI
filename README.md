@@ -1,6 +1,6 @@
 <img alt="OpenDroneMap WebUI" src="https://github.com/user-attachments/assets/7b0d82b9-2041-409e-bd95-06cbc024ffc0" width=480>
 
-> **📢 OpenDroneMap has officially decoupled from WebUI!** [Read the announcement](https://opendronemap.org/blog/announcement/)
+> **📢 OpenDroneMap has officially decoupled from WebODM!** [Read the announcement](https://opendronemap.org/blog/announcement/)
 
 A user-friendly, commercial grade software for drone image processing. Generate georeferenced maps, point clouds, elevation models and textured 3D models from aerial images. It supports multiple engines for processing, currently [ODM](https://github.com/OpenDroneMap/OpenDroneMap/ODM) and [MicMac](https://github.com/OpenDroneMap/NodeMICMAC/).
 
@@ -17,7 +17,6 @@ A user-friendly, commercial grade software for drone image processing. Generate 
       + [Enable IPv6](#enable-ipv6)
       + [Where Are My Files Stored?](#where-are-my-files-stored)
       + [Common Troubleshooting](#common-troubleshooting)
-         - [Images Missing from Lightning Assets](#images-missing-from-lightning-assets)
       + [Backup and Restore](#backup-and-restore)
       + [Reset Password](#reset-password)
       + [Manage Plugins](#manage-plugins)
@@ -201,25 +200,6 @@ While running WebUI with Docker Toolbox (VirtualBox) you cannot access WebUI fro
 On Windows, the storage space shown on the WebUI diagnostic page is not the same as what is actually set in Docker's settings. | From Hyper-V Manager, right-click “DockerDesktopVM”, go to Edit Disk, then choose to expand the disk and match the maximum size to the settings specified in the docker settings. Upon making the changes, restart docker.
 On Linux or WSL, Warning: `GPU use was requested, but no GPU has been found` | Run `nvidia-smi` (natively) or `docker run --rm --gpus all nvidia/cuda:11.2.2-devel-ubuntu20.04 nvidia-smi` (docker) to check with [NVIDIA driver](https://www.nvidia.com/drivers/unix/) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 
-#### Images Missing from Lightning Assets
-
-When you use Lightning to process your task, you will need to download all assets to your local instance of WebUI. The all assets zip does *not* contain the images which were used to create the orthomosaic. This means that, although you can visualise the cameras layer in your local WebUI, when you click on a particular camera icon the image will not be shown.
-
-The fix if you are using WebUI with Docker is as follows (instructions are for MacOS host):
-
-1. Ensure that you have a directory which contains all of the images for the task and only the images;
-2. Open Docker Desktop and navigate to Containers. Identify your WebUI instance and navigate to the container that is named `worker`. You will need the Container ID. This is a hash which is listed under the container name. Click to copy the Container ID using the copy icon next to it.
-3. Open Terminal and enter `docker cp <sourcedirectory>/. <dockercontainerID>:/webodm/app/media/project/<projectID>/task/<taskID>`. Paste the Container ID to replace the location titled `<dockercontainerID>`. Enter the full directory path for your images to replace `<sourcedirectory>`;
-4. Go back to Docker Desktop and navigate to Volumes in the side bar. Click on the volume called `webodm_appmedia`, click on `project`, identify the correct project and click on it, click on `task` and identify the correct task.
-5. From Docker Desktop substitute the correct `<projectID>` and `<taskID>` into the command in Terminal;
-6. Execute the newly edited command in Terminal. You will see a series of progress messages and your images will be copied to Docker;
-7. Navigate to your project in your local instance of WebUI;
-8. Open the Map and turn on the Cameras layer (top left);
-9. Click on a Camera icon and the relevant image will be shown
-
-
-Have you had other issues? Please [report them](https://github.com/OpenDroneMap/WebUI/issues/new) so that we can include them in this document.
-
 ### Backup and Restore
 
 If you want to move WebUI to another system, you just need to transfer the docker volumes (unless you are storing your files on the file system).
@@ -264,159 +244,6 @@ If you use docker, updating is as simple as running:
 ```bash
 ./webodm.sh update
 ```
-
-If you are running WebUI [natively](#run-it-natively), these commands should do it:
-
-```bash
-cd /webodm
-sudo su odm # Only in case you are running WebUI with a different user
-git pull origin master
-source python3-venv/bin/activate # If you are running a virtualenv
-npm install
-pip install -r requirements.txt
-webpack --mode production
-python manage.py collectstatic --noinput
-python manage.py migrate
-```
-
-## Run it natively
-
-WebUI can run natively on Windows, MacOS and Linux. We don't recommend nor support running WebUI natively (using docker is easier), but it's possible.
-
-Ubuntu 16.04 LTS users can refer to [this community script](/contrib/ubuntu_1604_install.sh) to install WebUI natively on a new machine.
-
-To run WebUI, you will need to install:
- * PostgreSQL (>= 9.5)
- * PostGIS 2.3
- * Python 3.6
- * GDAL (>= 3)
- * Node.js (>= 6.0)
- * Nginx (Linux/MacOS) - OR - Apache + mod_wsgi or Waitress (Windows)
- * Redis (>= 2.6)
- * GRASS GIS (>= 7.8)
-
-On Linux, make sure you have:
-
-```bash
-apt-get install binutils libproj-dev gdal-bin nginx
-```
-
-On Windows use the [OSGeo4W](https://trac.osgeo.org/osgeo4w/) installer to install GDAL. MacOS users can use:
-
-```
-brew install postgres postgis
-```
-
-Then these steps should be sufficient to get you up and running:
-
-```bash
-git clone --depth 1 https://github.com/OpenDroneMap/WebUI
-```
-
-Create a `WebUI/webodm/local_settings.py` file containing your database settings:
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'webodm_dev',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
-
-From psql or [pgadmin](https://www.pgadmin.org), connect to PostgreSQL, create a new database (name it `webodm_dev`), connect to it and set the [postgis.enable_outdb_rasters](http://postgis.net/docs/manual-2.2/postgis_enable_outdb_rasters.html) and [postgis.gdal_enabled_drivers](http://postgis.net/docs/postgis_gdal_enabled_drivers.html) settings:
-
-```sql
-ALTER SYSTEM SET postgis.enable_outdb_rasters TO True;
-ALTER SYSTEM SET postgis.gdal_enabled_drivers TO 'GTiff';
-```
-
-Start the redis broker:
-
-```bash
-redis-server
-```
-
-Then:
-
-```bash
-pip install -r requirements.txt
-sudo npm install -g webpack
-sudo npm install -g webpack-cli
-npm install
-webpack --mode production
-python manage.py collectstatic --noinput
-chmod +x start.sh && ./start.sh --no-gunicorn
-```
-
-Finally, start at least one celery worker:
-
-```bash
-./worker.sh start
-```
-
-The `start.sh` script will use Django's built-in server if you pass the `--no-gunicorn` parameter. This is good for testing, but bad for production.
-
-In production, if you have nginx installed, modify the configuration file in `nginx/nginx.conf` to match your system's configuration and just run `start.sh` without parameters.
-
-Windows users should refer to [this guide](https://docs.djangoproject.com/en/1.11/howto/deployment/wsgi/modwsgi/) to install Apache + mod_wsgi and run gunicorn:
-
-```bash
-gunicorn webodm.wsgi --bind 0.0.0.0:8000 --preload
-```
-
-If you are getting a `rt_raster_gdal_warp: Could not create GDAL transformation object for output dataset creation`, make sure that your PostGIS installation has PROJ support:
-
-```sql
-SELECT PostGIS_Full_Version();
-```
-
-You may also need to set the environment variable PROJSO to the .so or .dll projection library your PostGIS is using. This just needs to have the name of the file. So for example on Windows, you would in Control Panel -> System -> Environment Variables add a system variable called PROJSO and set it to libproj.dll (if you are using proj 4.6.1). You'll have to restart your PostgreSQL service/daemon after this change. [http://postgis.net/docs/manual-2.0/RT_ST_Transform.html](http://postgis.net/docs/manual-2.0/RT_ST_Transform.html)
-
-If you are using Windows and are unable to go past the `pip install -r requirements.txt` command because of an error regarding zlib and Pillow, manually edit the `requirements.txt` file, remove the Pillow requirement and run:
-
-```bash
-easy_install pillow
-pip install -r requirements.txt
-```
-
-On Windows make sure that all of your PATH environment variables are set properly. These commands:
-
-```bash
-python --version
-pip --version
-npm --version
-gdalinfo --version
-redis-server --version
-```
-Should all work without errors.
-
-## Run it on the cloud (Google Compute, Amazon AWS)
-
-12 steps, to have WebUI running on a cloud instance.
-
-These steps are for Google Cloud, but can also be used for Amazon AWS, and other cloud platforms with small modifications:
-
-1. Launch a Google Cloud instance of Ubuntu 18.0 LTS.
-2. Open the SSH terminal - Google offers SSH via the website.
-3. Run sudo apt-get update
-4. Run sudo apt-get upgrade
-5. Install [docker-compose](https://docs.docker.com/compose/install/). Do not install via apt for 24.04 onward.
-6. Run sudo apt-get install python-pip
-7. Run git clone https://github.com/OpenDroneMap/WebUI --config core.autocrlf=input --depth 1
-8. cd WebUI (Linux is case sensitive)
-9. sudo ./webodm.sh start
-10. You now can access webodm via the public IP address for your google instance. Remember the default port of 8000.
-11. Check that your instance's firewall is allowing inbound TCP connections on port 8000! If you forget this step you will not be able to connect to WebUI.
-12. Open http://GooglepublicIPaddressforyourinstance:8000
-
-To setup the firewall on Google Cloud, open the instance, on the middle of the instance settings page find NIC0. Open it, and then add the TCP Port 8000 for ingress, and egress on the Firewall.
-
-
 
 # Customizing and Extending
 
