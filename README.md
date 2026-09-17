@@ -264,7 +264,7 @@ Sometimes we also prioritize work that has received financial backing. If your o
 
 We have several channels of communication for people to ask questions and to get involved with the community:
 
- - [OpenDroneMap Community Forum](http://community.opendronemap.org/c/webodm)
+ - [OpenDroneMap Community Forum](https://community.opendronemap.org/c/opendronemap-desktop/6)
  - [Report Issues](https://github.com/OpenDroneMap/WebUI/issues)
 
 
@@ -272,9 +272,9 @@ We have several channels of communication for people to ask questions and to get
 
 There are many ways to contribute back to the project:
 
- - Help us test new and existing features and report [bugs](https://www.github.com/OpenDroneMap/WebUI/issues) and [feedback](http://community.opendronemap.org/c/webodm).
+ - Help us test new and existing features and report [bugs](https://www.github.com/OpenDroneMap/WebUI/issues) and [feedback](https://community.opendronemap.org/c/opendronemap-desktop/6).
  - [Share](http://community.opendronemap.org/c/datasets) your aerial datasets.
- - Help answer questions on the community [forum](http://community.opendronemap.org/c/desktop).
+ - Help answer questions on the community [forum](https://community.opendronemap.org/c/opendronemap-desktop/6).
  - ⭐️ us on GitHub.
  - Help us classify [point cloud datasets](https://github.com/OpenDroneMap/ODMSemantic3D).
  - Spread the word about WebUI and OpenDroneMap on social media.
