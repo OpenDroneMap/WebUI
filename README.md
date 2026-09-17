@@ -25,7 +25,6 @@ A user-friendly, commercial grade software for drone image processing. Generate 
    * [Run it natively](#run-it-natively)
    * [Run it on the cloud (Google Compute, Amazon AWS)](#run-it-on-the-cloud-google-compute-amazon-aws)
 - [Customizing and Extending](#customizing-and-extending)
-- [API Docs](#api-docs)
 - [Roadmap](#roadmap)
 - [Getting Help](#getting-help)
 - [Support the Project](#support-the-project)
@@ -252,10 +251,6 @@ More advanced customizations can be achieved by writing [plugins](https://github
 For plugins, the best source of documentation currently is to look at existing [code](https://github.com/OpenDroneMap/WebUI/tree/master/coreplugins). If a particular hook / entrypoint for your plugin does not yet exist, [request it](https://github.com/OpenDroneMap/WebUI/issues). We are adding hooks and entrypoints as we go.
 
 To create a plugin simply copy the `plugins/test` plugin into a new directory (for example, `plugins/myplugin`), then modify `manifest.json`, `plugin.py` and issue a `./webodm.sh restart`.
-
-# API Docs
-
-See the [API documentation page](http://docs.webodm.org).
 
 # Roadmap
 
