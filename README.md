@@ -55,8 +55,6 @@ Don't expect to process more than a few hundred images with these specifications
 
 WebUI runs best on Linux, but works well on Windows and Mac too. If you are technically inclined, you can get WebUI to run natively on all three platforms.
 
-WebUI by itself is just a user interface (see [below](#odm-nodeodm-webodm-what)) and does not require many resources. WebUI can be loaded on a machine with just 1 or 2 GB of RAM and work fine without NodeODM. You can then use a processing service such as the [lightning network](https://webodm.net) or run NodeODM on a separate, more powerful machine.
-
 ## Manual installation (Docker)
 To install WebUI manually on your machine with docker:
 
