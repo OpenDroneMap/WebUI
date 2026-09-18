@@ -6,7 +6,7 @@ WebUI is a fully up-to-date stack for generating georeferenced maps, point cloud
 
 **📢 OpenDroneMap has officially decoupled from WebODM!**
  
-**WebUI is a distinct product from WebODM, forked from WebODM in order to do the hard work of bringing a web app to users in need of a modern and secure web stack.**
+WebUI is a distinct product from WebODM, forked from WebODM in order to do the hard work of bringing a web app to users in need of a modern and secure web stack.
 
 **DO NOT install over an existing WebODM installation. Migration scripts forthcoming to do so. Please reach out on community.opendronemap.org or info@opendronmap.org if you would like early access to a beta-migration process to upgrade from WebODM**
 
