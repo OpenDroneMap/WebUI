@@ -1,8 +1,12 @@
 <img alt="OpenDroneMap WebUI" src="https://github.com/user-attachments/assets/7b0d82b9-2041-409e-bd95-06cbc024ffc0" width=480>
 
-> **📢 OpenDroneMap has officially decoupled from WebODM!**
-
 3D model your world with OpenDroneMap. WebUI is a fully up-to-date stack for generating georeferenced maps, point clouds, elevation models and textured 3D models from images or better yet images + GPS. It supports multiple engines for processing, including [ODM](https://github.com/OpenDroneMap/OpenDroneMap/ODM) and [MicMac](https://github.com/OpenDroneMap/NodeMICMAC/).
+
+> 📢 OpenDroneMap has officially decoupled from WebODM!
+> 
+>  WebUI is a distinct product from WebODM, forked from WebODM in order to do the hard work of bringing a web app to users in need of a modern and secure web stack.
+>
+> See [Up to date stack components](#up-to-date-stack-components)
 
 ![Screenshot of WebUI](https://github.com/user-attachments/assets/5bc10862-ebf9-453a-9857-3c6a1cfec110)
 
@@ -294,6 +298,22 @@ WebUI is built with scalability and performance in mind. While the default setup
 A few things to note:
  * We use Celery workers to do background tasks such as resizing images and processing task results, but we use an ad-hoc scheduling mechanism to communicate with NodeODM (which processes the orthophotos, 3D models, etc.). The choice to use two separate systems for task scheduling is due to the flexibility that an ad-hoc mechanism gives us for certain operations (capture task output, persistent data and ability to restart tasks mid-way, communication via REST calls, etc.).
  * If loaded on multiple machines, Celery workers should all share their `app/media` directory with the Django application (via network shares). You can manage workers via `./worker.sh`
+
+# Up to date stack components 
+
+> In order to support the latest and greatest features, WebUI brings up-to-date many pieces:
+> * Base images
+>   *  Security and performance first Alpine Linux when feasible
+>   *  Modern Debian otherwise
+> * Database
+>   * PostgreSQL 18
+>   * Postgis 3.6.4
+> * Broker
+>   * Valkey 9.1.0
+> * Web Framework
+>  * Django 6.0.7
+
+![Comparison of component versions between WebUI and WebODM](https://github.com/user-attachments/assets/6fa40974-68da-426b-8833-e58877b4c0d6)
  
 # License
 
