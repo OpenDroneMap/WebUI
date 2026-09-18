@@ -519,7 +519,7 @@ class TaskListItem extends React.Component {
     
     let expanded = "";
     if (this.state.expanded){
-      let showMemoryErrorWarning = this.state.memoryError && task.status == statusCodes.FAILED && window.location.hostname.indexOf("webodm.net") === -1,
+      let showMemoryErrorWarning = this.state.memoryError && task.status == statusCodes.FAILED && window.location.hostname.indexOf("hosted.opendronemap.org") === -1,
           showTaskWarning = this.state.friendlyTaskError !== "" && task.status == statusCodes.FAILED,
           showExitedWithCodeOneHints = task.last_error === "Process exited with code 1" &&
                                        !showMemoryErrorWarning &&
@@ -739,7 +739,7 @@ class TaskListItem extends React.Component {
                     /> : ""}
 
               {showMemoryErrorWarning ?
-              <div className="task-warning"><i className="fa fa-support"></i> <Trans params={{ memlink: `<a href="${memoryErrorLink}" target='_blank'>${_("enough RAM allocated")}</a>`, cloudlink: `<a href='https://webodm.net' target='_blank'>${_("cloud processing node")}</a>` }}>{_("It looks like your processing node ran out of memory. If you are using docker, make sure that your docker environment has %(memlink)s. Alternatively, make sure you have enough physical RAM, reduce the number of images, make your images smaller, or reduce the max-concurrency parameter from the task's options. You can also try to use a %(cloudlink)s.")}</Trans></div> : ""}
+              <div className="task-warning"><i className="fa fa-support"></i> <Trans params={{ memlink: `<a href="${memoryErrorLink}" target='_blank'>${_("enough RAM allocated")}</a>`, cloudlink: `<a href='https://hosted.opendronemap.org' target='_blank'>${_("cloud processing node")}</a>` }}>{_("It looks like your processing node ran out of memory. If you are using docker, make sure that your docker environment has %(memlink)s. Alternatively, make sure you have enough physical RAM, reduce the number of images, make your images smaller, or reduce the max-concurrency parameter from the task's options. You can also try to use a %(cloudlink)s.")}</Trans></div> : ""}
 
               {showTaskWarning ?
               <div className="task-warning"><i className="fa fa-support"></i> <span dangerouslySetInnerHTML={{__html: this.state.friendlyTaskError}} /></div> : ""}
