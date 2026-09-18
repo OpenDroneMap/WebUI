@@ -45,7 +45,7 @@
 
 # Getting Started
 
-Windows and macOS users can purchase an automated [installer](https://www.opendronemap.org/webodm/download#installer), which makes the installation process easier.
+Windows and macOS users can purchase an automated [installer](https://opendronemap.org/download/), which makes the installation process easier.
 
 ## Recommended Machine Specs
 
@@ -79,14 +79,14 @@ To install WebUI manually on your machine with docker:
 ```bash
 git clone https://github.com/OpenDroneMap/WebUI --config core.autocrlf=input --depth 1
 cd WebUI
-./webodm.sh start
+./webui.sh start
 ```
 * If you face any issues at the last step on Linux, make sure your user is part of the docker group:
 ```bash
 sudo usermod -aG docker $USER
 exit
 (restart shell by logging out and then back-in)
-./webodm.sh start
+./webui.sh start
 ```
 * Open a Web Browser to `http://localhost:8000` (unless you are on Windows using Docker Toolbox, see below)
 
@@ -102,13 +102,13 @@ The address to connect to would then be: `http://192.168.1.100:8000`.
 To stop WebUI press CTRL+C or run:
 
 ```
-./webodm.sh stop
+./webui.sh stop
 ```
 
 To update WebUI to the latest version use:
 
 ```bash
-./webodm.sh update
+./webui.sh update
 ```
 
 ### Manage Processing Nodes
@@ -121,7 +121,7 @@ You can also setup a [ClusterODM](https://github.com/OpenDroneMap/ClusterODM) no
 
 If you don't need the default "node-odm-1" node, simply pass `--default-nodes 0` flag when starting WebUI:
 
-`./webodm.sh restart --default-nodes 0`.
+`./webui.sh restart --default-nodes 0`.
 
 Then from the web interface simply manually remove the "node-odm-1" node.
 
@@ -129,7 +129,7 @@ Then from the web interface simply manually remove the "node-odm-1" node.
 
 WebUI can use [MicMac](https://github.com/OpenDroneMap/micmac) as a processing engine via [NodeMICMAC](https://github.com/OpenDroneMap/NodeMICMAC/). To add MicMac, simply run:
 
-`./webodm.sh restart --with-micmac`
+`./webui.sh restart --with-micmac`
 
 This will create a "node-micmac-1" processing node on the same machine running WebUI. Please note that NodeMICMAC is in active development and is currently experimental. If you find issues, please [report them](https://github.com/OpenDroneMap/NodeMICMAC/issues) on the NodeMICMAC repository.
 
@@ -137,17 +137,17 @@ This will create a "node-micmac-1" processing node on the same machine running W
 
 WebUI has the ability to automatically request and install a SSL certificate via [Let’s Encrypt](https://letsencrypt.org/), or you can manually specify your own key/certificate pair.
 
- - Setup your DNS record (webodm.myorg.com --> IP of server).
+ - Setup your DNS record (webui.myorg.com --> IP of server).
  - Make sure port 80 and 443 are open.
  - Run the following:
 
 ```bash
-./webodm.sh restart --ssl --hostname webodm.myorg.com
+./webui.sh restart --ssl --hostname webui.myorg.com
 ```
 
 That's it! The certificate will automatically renew when needed.
 
-If you want to specify your own key/certificate pair, simply pass the `--ssl-key` and `--ssl-cert` option to `./webodm.sh`. See `./webodm.sh --help` for more information.
+If you want to specify your own key/certificate pair, simply pass the `--ssl-key` and `--ssl-cert` option to `./webui.sh`. See `./webui.sh --help` for more information.
 
 Note! You cannot pass an IP address to the hostname parameter! You need a DNS record setup.
 
@@ -166,7 +166,7 @@ Restart Docker:
 
 To add IPv6, simply run:
 
-`./webodm.sh restart --ipv6`
+`./webui.sh restart --ipv6`
 
 Note: When using `--ssl` mode, you cannot pass an IP address to the hostname parameter; you must set up a DNS AAAA record. Without `--ssl` mode enabled, access the site at (e.g., http://[2001:0db8:3c4d:0015::1]:8000). The brackets around the IPv6 address are essential!
 You can add a new NodeODM node in WebUI by specifying an IPv6 address. Don’t forget to include brackets around the address! e.g., [2001:0db8:fd8a:ae80::1]
@@ -174,15 +174,15 @@ You can add a new NodeODM node in WebUI by specifying an IPv6 address. Don’t f
 ### Where Are My Files Stored?
 
 When using Docker, all processing results are stored in a docker volume and are not available on the host filesystem. There are two specific docker volumes of interest:
-1. Media (called webodm_appmedia): This is where all files related to a project and task are stored.
-2. Postgres DB (called webodm_dbdata): This is what Postgres database uses to store its data.
+1. Media (called webui_appmedia): This is where all files related to a project and task are stored.
+2. Postgres DB (called webui_dbdata): This is what Postgres database uses to store its data.
 
 For more information on how these two volumes are used and in which containers, please refer to the [docker-compose.yml](docker-compose.yml) file.
 
 For various reasons such as ease of backup/restore, if you want to store your files on the host filesystem instead of a docker volume, you need to pass a path via the `--media-dir` and/or the `--db-dir` options:
 
 ```bash
-./webodm.sh restart --media-dir /home/user/webodm_data --db-dir /home/user/webodm_db
+./webui.sh restart --media-dir /home/user/webui_data --db-dir /home/user/webui_db
 ```
 
 Note that existing task results will not be available after the change. Refer to the [Migrate Data Volumes](https://docs.docker.com/engine/tutorials/dockervolumes/#backup-restore-or-migrate-data-volumes) section of the Docker documentation for information on migrating existing task results.
@@ -196,7 +196,7 @@ While starting WebUI you get: `'WaitNamedPipe','The system cannot find the file 
 On Windows, docker-compose fails with `Failed to execute the script docker-compose` | Make sure you have enabled VT-x virtualization in the BIOS
 Cannot access WebUI using Microsoft Edge on Windows 10 | Try to tweak your internet properties according to [these instructions](http://www.hanselman.com/blog/FixedMicrosoftEdgeCantSeeOrOpenVirtualBoxhostedLocalWebSites.aspx)
 Getting a `No space left on device` error, but hard drive has enough space left | Docker on Windows by default will allocate only 20GB of space to the default docker-machine. You need to increase that amount. See [this link](http://support.divio.com/local-development/docker/managing-disk-space-in-your-docker-vm) and [this link](https://www.howtogeek.com/124622/how-to-enlarge-a-virtual-machines-disk-in-virtualbox-or-vmware/)
-Cannot start WebUI via `./webodm.sh start`, error messages are different at each retry | You could be running out of memory. Make sure you have enough RAM available. 2GB should be the recommended minimum, unless you know what you are doing
+Cannot start WebUI via `./webui.sh start`, error messages are different at each retry | You could be running out of memory. Make sure you have enough RAM available. 2GB should be the recommended minimum, unless you know what you are doing
 While running WebUI with Docker Toolbox (VirtualBox) you cannot access WebUI from another computer in the same network. | As Administrator, run `cmd.exe` and then type `"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" controlvm "default" natpf1 "rule-name,tcp,,8000,,8000"`
 On Windows, the storage space shown on the WebUI diagnostic page is not the same as what is actually set in Docker's settings. | From Hyper-V Manager, right-click “DockerDesktopVM”, go to Edit Disk, then choose to expand the disk and match the maximum size to the settings specified in the docker settings. Upon making the changes, restart docker.
 On Linux or WSL, Warning: `GPU use was requested, but no GPU has been found` | Run `nvidia-smi` (natively) or `docker run --rm --gpus all nvidia/cuda:11.2.2-devel-ubuntu20.04 nvidia-smi` (docker) to check with [NVIDIA driver](https://www.nvidia.com/drivers/unix/) and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
@@ -209,18 +209,18 @@ On the old system:
 
 ```bash
 mkdir -v backup
-docker run --rm --volume webodm_dbdata:/temp --volume `pwd`/backup:/backup ubuntu tar cvf /backup/dbdata.tar /temp
-docker run --rm --volume webodm_appmedia:/temp --volume `pwd`/backup:/backup ubuntu tar cvf /backup/appmedia.tar /temp
+docker run --rm --volume webui_dbdata:/temp --volume `pwd`/backup:/backup ubuntu tar cvf /backup/dbdata.tar /temp
+docker run --rm --volume webui_appmedia:/temp --volume `pwd`/backup:/backup ubuntu tar cvf /backup/appmedia.tar /temp
 ```
 
 Your backup files will be stored in the newly created `backup` directory. Transfer the `backup` directory to the new system, then on the new system:
 
 ```bash
 ls backup # --> appmedia.tar  dbdata.tar
-./webodm.sh down # Make sure WebUI is down
-docker run --rm --volume webodm_dbdata:/temp --volume `pwd`/backup:/backup ubuntu bash -c "rm -fr /temp/* && tar xvf /backup/dbdata.tar"
-docker run --rm --volume webodm_appmedia:/temp --volume `pwd`/backup:/backup ubuntu bash -c "rm -fr /temp/* && tar xvf /backup/appmedia.tar"
-./webodm.sh start
+./webui.sh down # Make sure WebUI is down
+docker run --rm --volume webui_dbdata:/temp --volume `pwd`/backup:/backup ubuntu bash -c "rm -fr /temp/* && tar xvf /backup/dbdata.tar"
+docker run --rm --volume webui_appmedia:/temp --volume `pwd`/backup:/backup ubuntu bash -c "rm -fr /temp/* && tar xvf /backup/appmedia.tar"
+./webui.sh start
 ```
 In case when recovery .tar is missed, or corrupted you can conduct [Hard Recovery](/contrib/Hard_Recovery_Guide.md)
 
@@ -229,7 +229,7 @@ In case when recovery .tar is missed, or corrupted you can conduct [Hard Recover
 If you forgot the password you picked the first time you logged into WebUI, to reset it just type:
 
 ```bash
-./webodm.sh start && ./webodm.sh resetadminpassword newpass
+./webui.sh start && ./webui.sh resetadminpassword newpass
 ```
 
 The password will be reset to `newpass`. The command will also tell you what username you chose.
@@ -243,7 +243,7 @@ Plugins can be enabled and disabled from the user interface. Simply go to Admini
 If you use docker, updating is as simple as running:
 
 ```bash
-./webodm.sh update
+./webui.sh update
 ```
 
 # Customizing and Extending
@@ -254,7 +254,7 @@ More advanced customizations can be achieved by writing [plugins](https://github
 
 For plugins, the best source of documentation currently is to look at existing [code](https://github.com/OpenDroneMap/WebUI/tree/master/coreplugins). If a particular hook / entrypoint for your plugin does not yet exist, [request it](https://github.com/OpenDroneMap/WebUI/issues). We are adding hooks and entrypoints as we go.
 
-To create a plugin simply copy the `plugins/test` plugin into a new directory (for example, `plugins/myplugin`), then modify `manifest.json`, `plugin.py` and issue a `./webodm.sh restart`.
+To create a plugin simply copy the `plugins/test` plugin into a new directory (for example, `plugins/myplugin`), then modify `manifest.json`, `plugin.py` and issue a `./webui.sh restart`.
 
 # Roadmap
 
@@ -282,7 +282,7 @@ There are many ways to contribute back to the project:
  - ⭐️ us on GitHub.
  - Help us classify [point cloud datasets](https://github.com/OpenDroneMap/ODMSemantic3D).
  - Spread the word about WebUI and OpenDroneMap on social media.
- - You can [pledge funds](https://fund.webodm.org) for getting new features built and bug fixed.
+ - You can [pledge funds](https://secure.givelively.org/donate/opendronemap) for getting new features built and bug fixed.
  - Become a contributor 🤘
 
 # Architecture Overview
