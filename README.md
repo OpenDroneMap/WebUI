@@ -8,7 +8,7 @@ WebUI is a fully up-to-date stack for generating georeferenced maps, point cloud
  
 **WebUI is a distinct product from WebODM, forked from WebODM in order to do the hard work of bringing a web app to users in need of a modern and secure web stack.**
 
-**See [Up to date stack components](#up-to-date-stack-components)**
+**See [Up-to-date stack components](#up-to-date-stack-components)**
 
 ![Screenshot of WebUI](https://github.com/user-attachments/assets/5bc10862-ebf9-453a-9857-3c6a1cfec110)
 
@@ -301,7 +301,7 @@ A few things to note:
  * We use Celery workers to do background tasks such as resizing images and processing task results, but we use an ad-hoc scheduling mechanism to communicate with NodeODM (which processes the orthophotos, 3D models, etc.). The choice to use two separate systems for task scheduling is due to the flexibility that an ad-hoc mechanism gives us for certain operations (capture task output, persistent data and ability to restart tasks mid-way, communication via REST calls, etc.).
  * If loaded on multiple machines, Celery workers should all share their `app/media` directory with the Django application (via network shares). You can manage workers via `./worker.sh`
 
-# Up to date stack components 
+# Up-to-date stack components 
 
 In order to support the latest and greatest features, WebUI brings up-to-date many pieces:
 * Base images
