@@ -2,7 +2,7 @@
 
 > **📢 OpenDroneMap has officially decoupled from WebODM!**
 
-A user-friendly, commercial grade software for drone image processing. Generate georeferenced maps, point clouds, elevation models and textured 3D models from aerial images. It supports multiple engines for processing, currently [ODM](https://github.com/OpenDroneMap/OpenDroneMap/ODM) and [MicMac](https://github.com/OpenDroneMap/NodeMICMAC/).
+3D model your world with OpenDroneMap. WebUI is a fully up-to-date stack for generating georeferenced maps, point clouds, elevation models and textured 3D models from images or better yet images + GPS. It supports multiple engines for processing, including [ODM](https://github.com/OpenDroneMap/OpenDroneMap/ODM) and [MicMac](https://github.com/OpenDroneMap/NodeMICMAC/).
 
 ![Screenshot of WebUI](https://github.com/user-attachments/assets/5bc10862-ebf9-453a-9857-3c6a1cfec110)
 
