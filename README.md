@@ -301,17 +301,17 @@ A few things to note:
 
 # Up to date stack components 
 
-> In order to support the latest and greatest features, WebUI brings up-to-date many pieces:
-> * Base images
->   *  Security and performance first Alpine Linux when feasible
->   *  Modern Debian otherwise
-> * Database
->   * PostgreSQL 18
->   * Postgis 3.6.4
-> * Broker
->   * Valkey 9.1.0
-> * Web Framework
->  * Django 6.0.7
+In order to support the latest and greatest features, WebUI brings up-to-date many pieces:
+* Base images
+  *  Security and performance first Alpine Linux when feasible
+  *  Modern Debian otherwise
+* Database
+  * PostgreSQL 18
+  * Postgis 3.6.4
+* Broker
+  * Valkey 9.1.0
+* Web Framework
+  * Django 6.0.7
 
 ![Comparison of component versions between WebUI and WebODM](https://github.com/user-attachments/assets/6fa40974-68da-426b-8833-e58877b4c0d6)
  
