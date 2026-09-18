@@ -1,14 +1,14 @@
 <img alt="OpenDroneMap WebUI" src="https://github.com/user-attachments/assets/7b0d82b9-2041-409e-bd95-06cbc024ffc0" width=480>
 
-3D model your world with OpenDroneMap.
+### 3D model your world with OpenDroneMap.
 
 WebUI is a fully up-to-date stack for generating georeferenced maps, point clouds, elevation models and textured 3D models from images or better yet images + GPS.
 
-> 📢 OpenDroneMap has officially decoupled from WebODM!
-> 
->  WebUI is a distinct product from WebODM, forked from WebODM in order to do the hard work of bringing a web app to users in need of a modern and secure web stack.
->
-> See [Up to date stack components](#up-to-date-stack-components)
+**📢 OpenDroneMap has officially decoupled from WebODM!**
+ 
+**WebUI is a distinct product from WebODM, forked from WebODM in order to do the hard work of bringing a web app to users in need of a modern and secure web stack.**
+
+**See [Up to date stack components](#up-to-date-stack-components)**
 
 ![Screenshot of WebUI](https://github.com/user-attachments/assets/5bc10862-ebf9-453a-9857-3c6a1cfec110)
 
