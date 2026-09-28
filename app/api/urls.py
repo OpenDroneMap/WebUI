@@ -11,7 +11,7 @@ from .imageuploads import Thumbnail, ImageDownload
 from .processingnodes import ProcessingNodeViewSet, ProcessingNodeOptionsView
 from .admin import AdminUserViewSet, AdminGroupViewSet, AdminProfileViewSet
 from rest_framework_nested import routers
-from rest_framework_simplejwt.views import TokenObtainPairView
+from .jwt import obtain_jwt_token, refresh_jwt_token
 from .tiler import TileJson, Bounds, Metadata, Tiles, Export
 from .potree import Scene, CameraView
 from .workers import CheckTask, GetTaskResult, CancelTask
@@ -51,8 +51,21 @@ urlpatterns = [
     re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/textured_model/$', TaskSafeTexturedModel.as_view()),
     re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/assets/(?P<unsafe_asset_path>.+)$', TaskAssets.as_view()),
     re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/import$', TaskAssetsImport.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/import/external/init$', TaskExternalImportInit.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/import/external/upload$', TaskExternalImportUpload.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/import/external/commit$', TaskExternalImportCommit.as_view()),
     re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/thumbnail$', TaskThumbnail.as_view()),
     re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/backup$', TaskBackup.as_view()),
+
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/media\.geojson$', TaskMediaGeoJSON.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/media/$', TaskMediaList.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/media/upload$', TaskMediaUpload.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/media/download/(?P<filename>.+)$', TaskMediaDownload.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/media/thumbnail/(?P<filename>.+)$', TaskMediaThumbnail.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/media/video/(?P<filename>[^/]+)/flightpath\.geojson$', TaskVideoFlightPath.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/media/manage/(?P<filename>.+)$', TaskMediaManage.as_view()),
+    re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/media/panorama/(?P<filename>[^/]+)/tiles/(?P<level>\d+)/(?P<face>\w)/(?P<row>\d+)/(?P<col>\d+)\.jpg$', TaskPanoramaTiles.as_view()),
+
     re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/images/thumbnail/(?P<image_filename>.+)$', Thumbnail.as_view()),
     re_path(r'projects/(?P<project_pk>[^/.]+)/tasks/(?P<pk>[^/.]+)/images/download/(?P<image_filename>.+)$', ImageDownload.as_view()),
 
@@ -61,16 +74,18 @@ urlpatterns = [
 
     re_path(r'workers/check/(?P<celery_task_id>.+)', CheckTask.as_view()),
     re_path(r'workers/get/(?P<celery_task_id>.+)', GetTaskResult.as_view()),
+    re_path(r'workers/cancel/(?P<celery_task_id>.+)', CancelTask.as_view()),
 
     path('auth/', include('rest_framework.urls')),
-    path('token-auth/', TokenObtainPairView.as_view()),
+    re_path(r'^token-auth/refresh/?$', refresh_jwt_token),
+    re_path(r'^token-auth/?$', obtain_jwt_token),
 
     re_path(r'^plugins/(?P<plugin_name>[^/.]+)/(.*)$', api_view_handler),
-]
 
-if settings.ENABLE_USERS_API:
-    urlpatterns.append(re_path(r'users', UsersList.as_view()))
+    path('user/profile/', UsersProfile.as_view()),
+    re_path(r'^users/?$', UsersList.as_view()),
+    re_path(r'^groups/?$', GroupsList.as_view()),
+]
 
 if settings.EXTERNAL_AUTH_ENDPOINT != '':
     urlpatterns.append(path('external-token-auth/', ExternalTokenAuth.as_view()))
-
