@@ -242,6 +242,7 @@ RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
         libpng \
         libwebp \
         tiff \
+        exiftool \
         py3-shapely
 
     # Install libexecinfo from Alpine 3.16 (removed in 3.17+)
