@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
     oom_score_adj: -100
   webapp:
-    build: .
+    image: opendronemap/webui
     container_name: webapp
     entrypoint: /bin/bash -c "crond && chmod +x /webui/*.sh && /bin/bash -c \"/webui/wait-for-postgres.sh db /webui/wait-for-it.sh -t 0 broker:6379 -- /webui/start.sh\""
     volumes:
@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
     oom_score_adj: -500
   worker:
-    build: .
+    image: opendronemap/webui
     container_name: worker
     entrypoint: /bin/bash -c "/webui/wait-for-postgres.sh db /webui/wait-for-it.sh -t 0 broker:6379 -- /webui/wait-for-it.sh -t 0 webapp:8000 -- /webui/worker.sh start"
     volumes:

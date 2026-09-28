@@ -608,7 +608,7 @@ update(){
 			if [[ -d "locale" ]] && [[ -n "$(ls -A locale)" ]]; then
 				run "git submodule sync"
 			fi
-			run "git pull origin master"
+			run "git pull origin main"
 		else
 			echo "Skipping source update (.git directory not found)"
 		fi
