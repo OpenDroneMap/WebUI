@@ -14,6 +14,7 @@ from django_filters import rest_framework as filters
 from django.db import transaction
 from django.contrib.auth.models import User, Group
 from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.db.models import Prefetch
 from django.contrib.postgres.aggregates import StringAgg
 from django.db.models import Q
 
@@ -103,9 +104,10 @@ class ProjectFilter(filters.FilterSet):
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    filter_fields = ('id', 'name', 'description', 'created_at')
     serializer_class = ProjectSerializer
-    queryset = models.Project.objects.prefetch_related('task_set').filter(deleting=False).order_by('-created_at')
+    queryset = models.Project.objects.prefetch_related(
+        Prefetch('task_set', queryset=models.Task.objects.order_by('-created_at'))
+    ).filter(deleting=False).order_by('-created_at')
     filterset_class = ProjectFilter
     ordering_fields = '__all__'
 
