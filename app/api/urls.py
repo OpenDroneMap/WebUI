@@ -11,7 +11,7 @@ from .imageuploads import Thumbnail, ImageDownload
 from .processingnodes import ProcessingNodeViewSet, ProcessingNodeOptionsView
 from .admin import AdminUserViewSet, AdminGroupViewSet, AdminProfileViewSet
 from rest_framework_nested import routers
-from .jwt import obtain_jwt_token, refresh_jwt_token
+from rest_framework_simplejwt.views import TokenObtainSlidingView, TokenRefreshSlidingView
 from .tiler import TileJson, Bounds, Metadata, Tiles, Export
 from .potree import Scene, CameraView
 from .workers import CheckTask, GetTaskResult, CancelTask
@@ -77,8 +77,8 @@ urlpatterns = [
     re_path(r'workers/cancel/(?P<celery_task_id>.+)', CancelTask.as_view()),
 
     path('auth/', include('rest_framework.urls')),
-    re_path(r'^token-auth/refresh/?$', refresh_jwt_token),
-    re_path(r'^token-auth/?$', obtain_jwt_token),
+    re_path(r'^token-auth/refresh/?$', TokenRefreshSlidingView.as_view()),
+    re_path(r'^token-auth/?$', TokenObtainSlidingView.as_view()),
 
     re_path(r'^plugins/(?P<plugin_name>[^/.]+)/(.*)$', api_view_handler),
 

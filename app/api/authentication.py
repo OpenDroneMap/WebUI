@@ -3,13 +3,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class JSONWebTokenAuthenticationQS(JWTAuthentication):
     """
-    JWT authentication that accepts tokens from query string parameter 'jwt'
-    instead of Authorization header
+    JWT authentication that accepts the token from the 'jwt' query string
+    parameter. Header authentication is handled by JWTAuthentication.
     """
-    def get_raw_token(self, request):
-        # Check query parameters first
-        token = request.query_params.get('jwt')
-        if token:
-            return token.encode('utf-8') if isinstance(token, str) else token
-        # Fall back to standard header-based authentication
-        return super().get_raw_token(request)
+    def authenticate(self, request):
+        raw_token = request.query_params.get('jwt')
+        if not raw_token:
+            return None
+
+        validated_token = self.get_validated_token(raw_token)
+        return self.get_user(validated_token), validated_token
