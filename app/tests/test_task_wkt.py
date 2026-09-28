@@ -29,13 +29,13 @@ class TestTaskWkt(BootTransactionTestCase):
 
         # Import with URL upload method
         res = client.post("/api/projects/{}/tasks/import".format(project.id), {
-            'url': "https://github.com/OpenDroneMap/WebUI/releases/download/v3.0.1/brighton-proj-test.zip",
+            'url': "https://github.com/WebODM/WebODM/releases/download/v3.0.1/brighton-proj-test.zip",
             'name': "test"
         })
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         url_import_task = Task.objects.get(id=res.data['id'])
-       
+   
         # Wait for completion
         c = 0
         while c < 10:
@@ -46,7 +46,7 @@ class TestTaskWkt(BootTransactionTestCase):
             c += 1
             time.sleep(1)
 
-        self.assertEqual(url_import_task.import_url, "https://github.com/OpenDroneMap/WebUI/releases/download/v3.0.1/brighton-proj-test.zip")
+        self.assertEqual(url_import_task.import_url, "https://github.com/WebODM/WebODM/releases/download/v3.0.1/brighton-proj-test.zip")
         self.assertEqual(url_import_task.name, "test")
 
         # EPSG should be none, but WKT should be populated
@@ -61,4 +61,4 @@ class TestTaskWkt(BootTransactionTestCase):
         res = client.get("/api/projects/{}/tasks/{}/orthophoto/metadata".format(project.id, url_import_task.id))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         metadata = json.loads(res.content.decode("utf-8"))
-        self.assertEqual(metadata['bounds']['crs'], url_import_task.wkt)
+        self.assertEqual(metadata['bounds']['crs'], 'EPSG:4326')
