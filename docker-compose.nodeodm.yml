@@ -10,7 +10,7 @@ services:
     environment:
       - WO_DEFAULT_NODES
   node-odm-1:
-    image: opendronemap/nodeodm:stable
+    image: opendronemap/nodeodm:3.6.2
     container_name: node-odm-1
     expose:
       - "3000"
