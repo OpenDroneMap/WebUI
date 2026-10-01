@@ -531,7 +531,7 @@ class Task(models.Model):
                     self.name = backup.get('name', self.name)
                     self.processing_time = backup.get('processing_time', self.processing_time)
                     self.options = backup.get('options', self.options)
-                    self.created_at = datetime.fromtimestamp(backup.get('created_at', self.created_at.astimezone(timezone.utc).timestamp()), tz=timezone.utc)
+                    self.created_at = datetime.fromtimestamp(backup.get('created_at', self.created_at.astimezone(tz.utc).timestamp()), tz=tz.utc)
                     self.public = backup.get('public', self.public)
                     self.resize_to = backup.get('resize_to', self.resize_to)
                     self.potree_scene = backup.get('potree_scene', self.potree_scene)

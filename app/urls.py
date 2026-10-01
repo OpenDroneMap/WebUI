@@ -42,6 +42,9 @@ urlpatterns = [
     path('about/', app_views.about, name='about'),
     re_path(r'^dev-tools/(?P<action>.*)$', dev_views.dev_tools, name='dev_tools'),
 
+    re_path(r'^oidc/login/(?P<provider_index>[0-9]+)/$', oidc_views.oidc_login, name='oidc_login'),
+    path('oidc/callback/', oidc_views.oidc_callback, name='oidc_callback'),
+
     # TODO: add caching: https://docs.djangoproject.com/en/5.2/topics/i18n/translation/#note-on-performance
     path('jsi18n/', JavaScriptCatalog.as_view(packages=['app']), name='javascript-catalog'),
     path('i18n/', include('django.conf.urls.i18n')),

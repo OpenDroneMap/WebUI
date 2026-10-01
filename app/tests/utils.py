@@ -21,9 +21,11 @@ def start_processing_node(args = []):
     node_odm = subprocess.Popen(['node', 'index.js', '--port', '11223', '--test'] + args, shell=False,
                                 cwd=os.path.join(current_dir, "..", "..", "nodeodm", "external", "NodeODM"))
     time.sleep(3)  # Wait for the server to launch
-    yield node_odm
-    node_odm.terminate()
-    time.sleep(1)  # Wait for the server to stop
+    try:
+        yield node_odm
+    finally:
+        node_odm.terminate()
+        node_odm.wait(timeout=10)
 
 @contextmanager
 def start_simple_auth_server(args = []):

@@ -542,7 +542,7 @@ down(){
 rebuild(){
 	run "$docker_compose down --remove-orphans"
 	run "rm -fr node_modules/ || sudo rm -fr node_modules/"
-	run "rm -fr nodeodm/external/NodeODM || sudo rm -fr nodeodm/external/NodeODM"
+	run "rm -fr nodeodm/external/NodeODM/node_modules || sudo rm -fr nodeodm/external/NodeODM/node_modules"
 	run "$docker_compose -f docker-compose.yml -f docker-compose.build.yml build --no-cache"
 	#run "docker images --no-trunc -aqf \"dangling=true\" | xargs docker rmi"
 	echo -e "\033[1mDone!\033[0m You can now start OpenDroneMap WebUI by running $0 start"
@@ -608,7 +608,7 @@ update(){
 			if [[ -d "locale" ]] && [[ -n "$(ls -A locale)" ]]; then
 				run "git submodule sync"
 			fi
-			run "git pull origin master"
+			run "git pull origin main"
 		else
 			echo "Skipping source update (.git directory not found)"
 		fi

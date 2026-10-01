@@ -91,7 +91,7 @@ class ProcessingNode(models.Model):
             self.last_refreshed = timezone.now()
             self.save()
             return True
-        except exceptions.GenericError:
+        except exceptions.OdmError:
             return False
 
     def api_client(self, timeout=30):
@@ -211,7 +211,7 @@ def auto_update_node_info(sender, instance, created, **kwargs):
     if created:
         try:
             instance.update_node_info()
-        except exceptions.GenericError:
+        except exceptions.OdmError:
             pass
         except Exception as e:
             logger.warning("auto_update_node_info: " + str(e))

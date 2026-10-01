@@ -514,7 +514,7 @@ class TestApi(BootTestCase):
             'username': 'testuser',
             'password': 'wrongpwd'
         })
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # Can generate token with valid credentials
         res = client.post('/api/token-auth/', {
@@ -523,7 +523,7 @@ class TestApi(BootTestCase):
         })
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-        token = res.data['access']
+        token = res.data['token']
         self.assertTrue(len(token) > 0)
 
         # Can access resources by passing token via querystring
@@ -532,5 +532,9 @@ class TestApi(BootTestCase):
 
         # Can access resources by passing token via header
         client = APIClient(HTTP_AUTHORIZATION="Bearer {0}".format(token))
+        res = client.get('/api/processingnodes/')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        client = APIClient(HTTP_AUTHORIZATION="JWT {0}".format(token))
         res = client.get('/api/processingnodes/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)

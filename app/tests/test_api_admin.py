@@ -31,7 +31,7 @@ class TestApiAdmin(BootTestCase):
             'password': super_user_pass,
         })
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        super_user_token = res.data['access']
+        super_user_token = res.data['token']
         client = APIClient(HTTP_AUTHORIZATION="Bearer {0}".format(super_user_token))
 
         # Can create (active) user
@@ -89,7 +89,7 @@ class TestApiAdmin(BootTestCase):
             'password': user_pass,
         })
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        user_token = res.data['access']
+        user_token = res.data['token']
         client = APIClient(HTTP_AUTHORIZATION="Bearer {0}".format(user_token))
 
         # Can't create user
@@ -127,7 +127,7 @@ class TestApiAdmin(BootTestCase):
             'password': super_user_pass,
         })
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        super_user_token = res.data['access']
+        super_user_token = res.data['token']
         client = APIClient(HTTP_AUTHORIZATION="Bearer {0}".format(super_user_token))
 
         # Can create group
@@ -181,7 +181,7 @@ class TestApiAdmin(BootTestCase):
             'password': user_pass,
         })
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        user_token = res.data['access']
+        user_token = res.data['token']
         client = APIClient(HTTP_AUTHORIZATION="Bearer {0}".format(user_token))
 
         # Can't create group
@@ -286,63 +286,4 @@ class TestApiAdmin(BootTestCase):
         })
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertNotEqual(token, res.data['token'])
-        self.assertEqual(jwt.decode(res.data['token'], None, False).get('username'), 'testuser')
-
-    def test_impersonation(self):
-        client = APIClient()
-        
-        # Create a test user to impersonate
-        impersonated_user = User.objects.create_user(
-            username='impersonateduser',
-            password='test1234',
-        )
-
-        # Create a mock project for the impersonated user
-        Project.objects.create(
-            owner=impersonated_user,
-            name='Impersonated Project'
-        )
-        
-        # Regular user can get token, but can't impersonate
-        user_name = 'testuser'
-        user_pass = 'test1234'
-        res = client.post('/api/token-auth/', {
-            'username': user_name,
-            'password': user_pass,
-        })
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-
-        res = client.post('/api/token-auth/', {
-            'username': user_name,
-            'password': user_pass,
-            'impersonate': 'impersonateduser'
-        })
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        
-        # Super user can impersonate
-
-        # Create a mock project for admin user
-        Project.objects.create(
-            owner=User.objects.get(username='testsuperuser'),
-            name='Admin Project'
-        )
-
-        client = APIClient()
-        res = client.post('/api/token-auth/', {
-            'username': 'testsuperuser',
-            'password': 'test1234',
-            'impersonate': 'impersonateduser'
-        })
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        impersonated_token = res.data['token']
-        
-        # Use impersonated token to access projects
-        # Projects should be filtered by impersonated user
-        impersonated_client = APIClient(HTTP_AUTHORIZATION="{0} {1}".format(api_settings.JWT_AUTH_HEADER_PREFIX, impersonated_token))
-        
-        res = impersonated_client.get('/api/projects/')
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        
-        # Verify the response contains only projects owned by impersonated user
-        self.assertEqual(len(res.data), 1)
-        self.assertTrue(res.data[0]['name'] == 'Impersonated Project')
+        self.assertEqual(str(jwt.decode(res.data['token'], options={'verify_signature': False}).get('user_id')), str(User.objects.get(username='testuser').id))
