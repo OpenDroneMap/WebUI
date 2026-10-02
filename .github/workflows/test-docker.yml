@@ -30,3 +30,19 @@ jobs:
         docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
         sleep 20
         docker compose exec -T webapp /webui/webui.sh test
+
+  image:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        submodules: 'recursive'
+      name: Checkout
+    - name: Build
+      run: docker build .
