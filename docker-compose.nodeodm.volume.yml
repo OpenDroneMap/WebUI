@@ -1,7 +1,6 @@
 # Chaining this file to the main docker-compose file setups
 # volumes for NodeODM.
 
-version: '2.1'
 services:
   node-odm-1:
     volumes:
