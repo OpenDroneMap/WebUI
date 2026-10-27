@@ -4,6 +4,8 @@ version: '2.1'
 volumes:
   dbdata:
   appmedia:
+    name: ${WO_MEDIA_VOLUME:-${COMPOSE_PROJECT_NAME}_appmedia}
+    external: ${WO_MEDIA_EXTERNAL:-false}
 services:
   db:
     image: postgis/postgis:18-3.6-alpine
