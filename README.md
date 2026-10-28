@@ -189,6 +189,19 @@ For various reasons such as ease of backup/restore, if you want to store your fi
 
 Note that existing task results will not be available after the change. Refer to the [Migrate Data Volumes](https://docs.docker.com/engine/tutorials/dockervolumes/#backup-restore-or-migrate-data-volumes) section of the Docker documentation for information on migrating existing task results.
 
+### Migrating from WebODM
+
+Stop WebODM with `./webodm.sh stop`. If WebODM kept its database in a docker volume (the default), the first `./webui.sh start` finds it and offers to import it. The projects, tasks and users are copied into WebUI's own database and WebODM's media volume is used in place, so no task results are copied. WebODM's database is not modified.
+
+If WebODM was started with `--db-dir`, Postgres 18 cannot use that directory. Import it into a new one:
+
+```bash
+./webui.sh import-webodm --webodm-db-dir /home/user/webodm_db --db-dir /home/user/webui_db
+./webui.sh start --db-dir /home/user/webui_db
+```
+
+Leave out `--db-dir` to import into a docker volume instead.
+
 ### Common Troubleshooting
 
 Symptoms | Possible Solutions
