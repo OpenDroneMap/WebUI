@@ -5,10 +5,8 @@
 WebUI is a fully up-to-date stack for generating georeferenced maps, point clouds, elevation models and textured 3D models from images or better yet images + GPS.
 
 **📢 OpenDroneMap has officially decoupled from WebODM!**
- 
-WebUI is a distinct product from WebODM, forked from WebODM in order to do the hard work of bringing a web app to users in need of a modern and secure web stack.
 
-**DO NOT install over an existing WebODM installation. Migration scripts forthcoming to do so. Please reach out on https://community.opendronemap.org or info@opendronemap.org if you would like early access to a beta-migration process to upgrade from WebODM**
+WebUI is a distinct product from WebODM, forked from WebODM in order to do the hard work of bringing a web app to users in need of a modern and secure web stack. When you run WebUI for the first time, you will have the option to migrate your data across.
 
 **See [Up-to-date stack components](#up-to-date-stack-components)**
 
@@ -41,7 +39,7 @@ WebUI is a distinct product from WebODM, forked from WebODM in order to do the h
 - [Architecture Overview](#architecture-overview)
 - [License](#license)
 - [Trademark](#trademark)
- 
+
  * [Download](https://opendronemap.org/download)
  * [Documentation](https://docs.opendronemap.org/)
  * [Hardware Requirements](https://docs.opendronemap.org/installation/#hardware-requirements)
@@ -75,7 +73,7 @@ To install WebUI manually on your machine with docker:
     2.  give Docker enough CPUs (default 2) and RAM (>4Gb, 16Gb better but leave some for Windows) by going to Settings -- Advanced
 
     3.  select where on your hard drive you want virtual hard drives to reside (Settings -- Advanced -- Images & Volumes).
-    
+
     4.  If you want to run the processing component (NodeODM) with GPU acceleration, install [WSL](https://learn.microsoft.com/windows/wsl/) and [set up GPU acceleration](https://learn.microsoft.com/windows/wsl/tutorials/gpu-compute). It's supported on Windows 11 or Windows 10, version 21H2 or higher.
 
 ### Installation with Docker
@@ -191,6 +189,19 @@ For various reasons such as ease of backup/restore, if you want to store your fi
 
 Note that existing task results will not be available after the change. Refer to the [Migrate Data Volumes](https://docs.docker.com/engine/tutorials/dockervolumes/#backup-restore-or-migrate-data-volumes) section of the Docker documentation for information on migrating existing task results.
 
+### Migrating from WebODM
+
+Stop WebODM with `./webodm.sh stop`. If WebODM kept its database in a docker volume (the default), the first `./webui.sh start` finds it and offers to import it. The projects, tasks and users are copied into WebUI's own database and WebODM's media volume is used in place, so no task results are copied. WebODM's database is not modified.
+
+If WebODM was started with `--db-dir`, Postgres 18 cannot use that directory. Import it into a new one:
+
+```bash
+./webui.sh import-webodm --webodm-db-dir /home/user/webodm_db --db-dir /home/user/webui_db
+./webui.sh start --db-dir /home/user/webui_db
+```
+
+Leave out `--db-dir` to import into a docker volume instead.
+
 ### Common Troubleshooting
 
 Symptoms | Possible Solutions
@@ -303,7 +314,7 @@ A few things to note:
  * We use Celery workers to do background tasks such as resizing images and processing task results, but we use an ad-hoc scheduling mechanism to communicate with NodeODM (which processes the orthophotos, 3D models, etc.). The choice to use two separate systems for task scheduling is due to the flexibility that an ad-hoc mechanism gives us for certain operations (capture task output, persistent data and ability to restart tasks mid-way, communication via REST calls, etc.).
  * If loaded on multiple machines, Celery workers should all share their `app/media` directory with the Django application (via network shares). You can manage workers via `./worker.sh`
 
-# Up-to-date stack components 
+# Up-to-date stack components
 
 In order to support the latest and greatest features, WebUI brings up-to-date many pieces:
 * Base images
@@ -318,7 +329,7 @@ In order to support the latest and greatest features, WebUI brings up-to-date ma
   * Django 6.0.7
 
 ![Comparison of component versions between WebUI and WebODM](https://github.com/user-attachments/assets/6fa40974-68da-426b-8833-e58877b4c0d6)
- 
+
 # License
 
 OpenDroneMap WebUI is licensed under the terms of the [GNU Affero General Public License v3.0](https://github.com/OpenDroneMap/WebUI/blob/master/LICENSE.md).

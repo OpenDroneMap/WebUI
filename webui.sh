@@ -30,6 +30,7 @@ fi
 
 # Load default values
 source "${__dirname}/.env"
+source "${__dirname}/import-webodm.sh"
 DEFAULT_PORT="$WO_PORT"
 DEFAULT_HOST="$WO_HOST"
 DEFAULT_MEDIA_DIR="$WO_MEDIA_DIR"
@@ -161,6 +162,16 @@ case $key in
     export WO_IPV6=YES
     shift # past argument
     ;;
+    --skip-import)
+    skip_import=true
+    shift # past argument
+    ;;
+    --webodm-db-dir)
+    WO_WEBODM_DB_DIR=$(realpath "$2")
+    export WO_WEBODM_DB_DIR
+    shift # past argument
+    shift # past value
+    ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
     shift # past argument
@@ -189,6 +200,7 @@ usage(){
   echo "	rebuild			Rebuild all docker containers and perform cleanups"
   echo "	checkenv		Do an environment check and install missing components"
   echo "	test [frontend|backend] [args]	Run tests (all tests, or just frontend/backend with optional arguments)"
+  echo "	import-webodm [options]	Import the database of a stopped WebODM installation into this unused OpenDroneMap WebUI installation and use its media in place. Pass --webodm-db-dir for a WebODM started with --db-dir."
   echo "	resetadminpassword \"<new password>\"	Reset the administrator's password to a new one. OpenDroneMap WebUI must be running when executing this command and the password must be enclosed in double quotes."
   echo ""
   echo "Options:"
@@ -213,6 +225,8 @@ usage(){
   echo "	--worker-memory	Maximum amount of memory allocated for the worker process (default: unlimited)"
   echo "	--worker-cpus	Maximum number of CPUs allocated for the worker process (default: all)"
   echo "	--ipv6	Enable IPV6"
+  echo "	--skip-import	Start with an empty installation even if a WebODM database is found (default: ask)"
+  echo "	--webodm-db-dir	<path>	Database directory of a WebODM installation started with --db-dir, for import-webodm (default: docker volume webodm_dbdata)"
   
   exit
 }
@@ -436,6 +450,8 @@ start(){
 	# mkdir -p $WO_MEDIA_DIR
 	# mkdir -p webui/app/media/tmp
 
+	import_webodm_offer
+
 	command="$docker_compose -f docker-compose.yml"
 
     if [[ $WO_DEFAULT_NODES -gt 0 ]]; then
@@ -581,7 +597,7 @@ resetpassword(){
 	newpass=$1
 
 	if [[ -n "$newpass" ]]; then
-		container_hash=$(docker ps -q --filter "name=webapp")
+		container_hash=$(docker ps -q --filter "name=^webui-webapp$")
 		if [[ -z "$container_hash" ]]; then
 			echo -e "\033[91mCannot find webapp docker container. Is OpenDroneMap WebUI running?\033[39m"
 			exit 1
@@ -676,6 +692,10 @@ elif [[ $1 = "checkenv" ]]; then
 elif [[ $1 = "test" ]]; then
 	shift || true
 	run_tests "$@"
+elif [[ $1 = "import-webodm" ]]; then
+	environment_check
+	import_webodm
+	import_webodm_start_hint
 elif [[ $1 = "resetadminpassword" ]]; then
 	resetpassword "$2"
 else
