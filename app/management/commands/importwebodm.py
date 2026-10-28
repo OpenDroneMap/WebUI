@@ -92,8 +92,10 @@ def import_database(source, target, stdout=None):
                                                            '-v', 'ON_ERROR_STOP=1', '--single-transaction'],
                                env=pg_env(target), stdin=dump.stdout, stderr=subprocess.PIPE)
     dump.stdout.close()
-    _, restore_err = restore.communicate()
-    _, dump_err = dump.communicate()
+    restore_err = restore.stderr.read()
+    restore.wait()
+    dump_err = dump.stderr.read()
+    dump.wait()
     if restore.returncode != 0:
         raise CommandError("restore failed: {}".format(restore_err.decode(errors='replace').strip()))
     if dump.returncode != 0:
