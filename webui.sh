@@ -590,7 +590,7 @@ resetpassword(){
 	newpass=$1
 
 	if [[ -n "$newpass" ]]; then
-		container_hash=$(docker ps -q --filter "name=webapp")
+		container_hash=$(docker ps -q --filter "name=^webui-webapp$")
 		if [[ -z "$container_hash" ]]; then
 			echo -e "\033[91mCannot find webapp docker container. Is OpenDroneMap WebUI running?\033[39m"
 			exit 1

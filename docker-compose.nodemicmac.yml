@@ -11,7 +11,7 @@ services:
       - WO_CREATE_MICMAC_PNODE=YES
   node-micmac-1:
     image: opendronemap/nodemicmac
-    container_name: node-micmac-1
+    container_name: webui-node-micmac-1
     expose:
       - "3000"
     restart: unless-stopped

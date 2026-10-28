@@ -11,7 +11,7 @@ services:
       - WO_DEFAULT_NODES
   node-odm-1:
     image: opendronemap/nodeodm:3.6.2
-    container_name: node-odm-1
+    container_name: webui-node-odm-1
     expose:
       - "3000"
     restart: unless-stopped

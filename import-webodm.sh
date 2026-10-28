@@ -56,8 +56,7 @@ import_webodm_refuse_dir(){
 }
 
 import_webodm_check_webodm_stopped(){
-	# WebODM and OpenDroneMap WebUI both name their database container "db"
-	if docker ps --filter name='^db$' --format '{{.Image}}' | grep -q 'webodm_db'; then
+	if docker ps --format '{{.Image}}' | grep -q '^webodm/webodm_db'; then
 		echo -e "\033[91mWebODM is running. Stop it first with webodm.sh stop\033[39m"
 		exit 1
 	fi
@@ -170,7 +169,7 @@ import_webodm(){
 	# its data directory, which in the path layout includes the new cluster.
 	docker rm -f "$import_webodm_container" > /dev/null 2>&1 || true
 	import_webodm_quiet env WO_DB_DIR="$target_db_dir" $docker_compose -f docker-compose.yml up --no-start db
-	network=$(docker inspect db --format '{{range $name, $_ := .NetworkSettings.Networks}}{{$name}}{{end}}')
+	network=$(docker inspect webui-db --format '{{range $name, $_ := .NetworkSettings.Networks}}{{$name}}{{end}}')
 
 	echo "Starting the WebODM database..."
 	import_webodm_quiet docker run -d --name "$import_webodm_container" --network "$network" -v "$src_db:/var/lib/postgresql/data" "$import_webodm_image"
